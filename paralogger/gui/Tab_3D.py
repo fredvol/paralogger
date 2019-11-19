@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout,
 from pyqtgraph.Qt import QtCore, QtGui
 
 try:
+    # It raised a exeption but it can pass 
     from geometry_modeling import Create_geom
 except :
     pass
@@ -264,10 +265,20 @@ class Visualizer3D(object):
 
     def start(self):
 
-        if (sys.flags.interactive != 1) or not hasattr(QtCore, "PYQT_VERSION"):
-           # sys.exit(QtGui.QApplication.instance().exec_())
-           QtGui.QApplication.instance().exec_()
-           print("Exit")
+        self.position_update_timer = QtCore.QTimer()
+        self.position_update_timer.timeout.connect(self.update)
+        self.position_update_timer.start(self.step_interval*1000)
+        print(self.position_update_timer.remainingTime())
+        print(self.position_update_timer.isActive())
+
+
+
+        # SI c'est pas commenter , message d'erreur, mais le coeur du problem est la ! 
+
+        # if (sys.flags.interactive != 1) or not hasattr(QtCore, "PYQT_VERSION"):
+        #    # sys.exit(QtGui.QApplication.instance().exec_())
+        #    QtGui.QApplication.instance().exec_()
+        #    print("Exit")
 
     def update(self):
 
@@ -345,16 +356,17 @@ class Visualizer3D(object):
         #Plot 
         self.custom= add_plot(mdata , self.plots)
 
-        timer = QtCore.QTimer()
-        timer.timeout.connect(self.update)
+
 
         self.calculate_average_time() 
 
         print("step time ms:", self.step_interval) 
 
-        timer.start(self.step_interval*1000)  # because timer.start is in ms not in s
+        # timer = QtCore.QTimer()
+        # timer.timeout.connect(self.update)
+        # timer.start(self.step_interval*1000)  # because timer.start is in ms not in s
 
-        #self.start()
+        self.start()
 
 
 # Start Qt event loop unless running in interactive mode.
