@@ -7,9 +7,14 @@ import os.path
 import random
 import string
 import time
-
+import sys
+import pkgutil
 import numpy as np
 import pandas as pd
+import pip
+
+import platform
+import json
 
 from import_ulog import ulog_list_data, ulog_param, ulog_to_df
 from list_param import Device, Kind, Position
@@ -74,6 +79,21 @@ def sha256sum(filename):
             h.update(mv[:n])
     return h.hexdigest()
 
+def getSystemInfo():
+        try:
+            info={}
+            info['platform']=platform.system()
+            info['platform-release']=platform.release()
+            info['platform-version']=platform.version()
+            info['architecture']=platform.machine()
+            info['processor']=platform.processor()
+
+            info['python version:'] =sys.version
+            info['modules:']=list(sys.modules.keys())
+
+            return json.dumps(info)
+        except Exception as e:
+            logging.exception(e)
 
 ############################# MAIN MODEL #############################
 
@@ -99,7 +119,7 @@ class Flight:
 
         self.sections = []
 
-        self.version = 1  # version of the data model
+        self.flight_version = 1  # version of the data model
 
     @timeit
     def add_data_file(self, mfilePath, mdevice, mposition):

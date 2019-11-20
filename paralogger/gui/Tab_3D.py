@@ -167,9 +167,9 @@ class Visualizer3D(object):
         #Main Widget containing everything
 
         self.mainWidget = QWidget(parent)
-        #self.mainWidget.setGeometry(0, 0, 400,400)
         # general layout
         self.layout_general = QVBoxLayout(self.mainWidget)
+        
 
         #Top Layout
         self.layout_top = QHBoxLayout()
@@ -253,7 +253,7 @@ class Visualizer3D(object):
         if (sys.flags.interactive != 1) or not hasattr(QtCore, "PYQT_VERSION"):
             # sys.exit(QtGui.QApplication.instance().exec_())
             QtGui.QApplication.instance().exec_()
-            print("Exit")
+            logger.info("Exit")
 
 
 
@@ -337,7 +337,7 @@ class Visualizer3D(object):
 
         self.calculate_average_time()
 
-        print("step time ms:", self.step_interval)
+        logger.info("step time ms: " + str(self.step_interval))
 
         self.timer.start(self.step_interval * 1000)  # because timer.start is in ms not in s
 
