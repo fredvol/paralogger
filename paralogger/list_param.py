@@ -1,20 +1,23 @@
 ############################# TOOLS CLASS #############################
 
 class Device():
-    GPSBIP = "mGpsbip"
-    SENSBOX = "mSensbox"
-    PIXRACER = "mPIXRACER"
+    SENSBOX = "Sensbox (not suported)"
+    PIXRACER = "Pixracer"
 
+class VideoDevice():
+    GOPRO_3 = "GOPRO_3"
+    GOPRO_5 = "GOPRO_5"
+    GOPRO_7 = "GOPRO_7"
 
 class Position():
-    PILOT = "mPilot"
-    GLIDER = "mGlider"
+    PILOT = "Pilot"
+    GLIDER = "Glider"
 
 class Kind():
-    FRONTAL = "mFrontal"
-    ASYM = "mAsym"
-    SPIRAL = "mSpiral"
-    MISC = "mMisc"
+    FRONTAL = "Frontal"
+    ASYM = "Asym"
+    SPIRAL = "Spiral"
+    MISC = "Misc"
 
 
 

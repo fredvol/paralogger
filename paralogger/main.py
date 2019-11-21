@@ -12,6 +12,7 @@ import pickle
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 
 from gui.main_gui import Ui_MainWindow
+from import_log import import_log_diaglog
 
 from model import timeit, Flight, Sections ,getSystemInfo
 from list_param import Position
@@ -86,6 +87,7 @@ class Prog(QtGui.QMainWindow):
         #add Action
         self.ui.actionOpen.triggered.connect(self.open_pickle_file)
         self.ui.actionSave_as.triggered.connect(self.save_pickle_file)
+        self.ui.actionimport.triggered.connect(self.import_log_window)
         self.ui.actionVersion.triggered.connect(self.about_popup)
         self.ui.actionHelp.triggered.connect(self.openUrl_help)
         self.ui.actiondebug_open.triggered.connect(self.debug)
@@ -145,6 +147,13 @@ class Prog(QtGui.QMainWindow):
 
         except Exception as ex:
             logger.error(ex)
+    
+    def import_log_window(self):
+        # If you pass a parent (self) will block the Main Window,
+        # and if you do not pass both will be independent,
+        # I recommend you try both cases.
+        widget = import_log_diaglog()
+        widget.exec_()
 
     def about_popup(self):
         """ About section 

@@ -110,6 +110,7 @@ class Flight:
 
         self.manufacturer = None
         self.glider = None
+        self.size = None
         self.modif = None
         self.pilot = None
         self.weight = None
@@ -129,9 +130,10 @@ class Flight:
 
         self.data.append(mData_File)
 
-    def add_info(self, mmanufacturer, mglider, mmodif, mpilot, mweight, mlocation):
+    def add_info(self, mmanufacturer, mglider,msize, mmodif, mpilot, mweight, mlocation):
         self.manufacturer = mmanufacturer
         self.glider = mglider
+        self.size = msize
         self.modif = mmodif
         self.pilot = mpilot
         self.weight = mweight
@@ -283,3 +285,20 @@ class Data_File:
         )
 
         return {"timestamp_start": timestamp_start, "timestamp_end": timestamp_end}
+
+class Video_File:
+    def __repr__(self):
+        return str(self.__dict__)
+
+    def __init__(self, mfilePath, mdevice):
+        logger.info("Data_File ")
+
+        self.version = 1  # version of the Data_File model
+        self.file_path = mfilePath
+        self.file_date = None
+        self.file_sha1 = None
+        self.device = mdevice
+
+        self.file_sha1 = sha256sum(self.file_path)
+
+        self.file_date = time.ctime(os.path.getctime(self.file_path))
