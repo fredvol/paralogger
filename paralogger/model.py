@@ -115,6 +115,7 @@ class Flight:
         self.pilot = None
         self.weight = None
         self.location = None
+        self.laboratory = None
 
         self.data = []
 
@@ -130,7 +131,7 @@ class Flight:
 
         self.data.append(mData_File)
 
-    def add_info(self, mmanufacturer, mglider,msize, mmodif, mpilot, mweight, mlocation):
+    def add_info(self, mmanufacturer, mglider,msize, mmodif, mpilot, mweight, mlocation,mlabo):
         self.manufacturer = mmanufacturer
         self.glider = mglider
         self.size = msize
@@ -138,12 +139,15 @@ class Flight:
         self.pilot = mpilot
         self.weight = mweight
         self.location = mlocation
+        self.laboratory = mlabo
+
 
     def get_df_by_position(self, mposition):
         df_to_return = []
         for dataf in self.data:
             if dataf.position == mposition:
                 df_to_return.append(dataf.df)
+            
         return df_to_return
 
     def apply_section(self,uid,time_calibrate=5):
@@ -196,7 +200,7 @@ class Flight:
 
 class Sections:
     def __repr__(self):
-        return str(self.__dict__)
+        return '%s (%s,%s) ' % (self.kind, self.start , self.end)
 
     def __init__(self, start = None , end=None , kind=None):
 
@@ -219,10 +223,8 @@ class Sections:
         avg_yaw = df.loc[mask, 'yaw'].mean()
 
         if (avg_pitch == None or avg_roll == None or avg_yaw == None):
-            #raise CalibrationError("calibration failed")
-            logger.warning("calibration failed")
+            logger.warning("Calibration failed section: " + self.__repr__)
 
-  
         logger.info( " calibrating  from time0_s: " + str(t_start) + "s to : " + str(t_end) + " s" )
         logger.debug( ' avg_pitch :' + str(avg_pitch) + " rad so: " + str(np.rad2deg(avg_pitch)) + " deg")
         logger.debug( ' avg_roll :' + str(avg_roll) + " rad so: " + str(np.rad2deg(avg_roll)) + " deg")
@@ -237,8 +239,7 @@ class Sections:
         
 
 class Data_File:
-    def __repr__(self):
-        return str(self.__dict__)
+
 
     def __init__(self, mfilePath, mdevice, mposition):
         logger.info("Data_File ")
@@ -257,6 +258,9 @@ class Data_File:
         self.file_sha1 = sha256sum(self.file_path)
 
         self.file_date = time.ctime(os.path.getctime(self.file_path))
+
+    def __repr__(self):
+        return '%s (%s) ' % (self.position, str(self.df.shape))
 
     def populate_df(self):
         logger.info("populate_df ")
@@ -288,7 +292,7 @@ class Data_File:
 
 class Video_File:
     def __repr__(self):
-        return str(self.__dict__)
+        return '%s' % (self.device)
 
     def __init__(self, mfilePath, mdevice):
         logger.info("Data_File ")

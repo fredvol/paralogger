@@ -152,8 +152,12 @@ class Prog(QtGui.QMainWindow):
         # If you pass a parent (self) will block the Main Window,
         # and if you do not pass both will be independent,
         # I recommend you try both cases.
-        widget = import_log_diaglog()
-        widget.exec_()
+        widget_import_new = import_log_diaglog()
+        widget_import_new.exec_()
+        logger.debug("back in main prog")
+        self.flight = widget_import_new.imported_Flight
+        self.update_project_tree()
+
 
     def about_popup(self):
         """ About section 
@@ -323,28 +327,27 @@ class Prog(QtGui.QMainWindow):
         self.ui.tab_3d.setLayout(self.visualizer_3d.layout_general)
 
     def display_tab_Table(self, uid):
-        if uid != None:  # if it is a section
-            df_to_plot = self.flight.apply_section(uid)
-        else:  # if not section passed , then plot main df
-            df_to_plot = self.flight.get_df_by_position(Position.PILOT)[0] 
+        try:
+            if uid != None:  # if it is a section
+                df_to_plot = self.flight.apply_section(uid)
+            else:  # if not section passed , then plot main df
+                df_to_plot = self.flight.get_df_by_position(Position.PILOT)[0] 
 
+            model = pandasTableModel(df_to_plot)
+            if len(self.ui.tab_table.children()) > 0:
+                self.ui.tab_table.children()[1].setModel(model)
+            else:
+                mainLayout = QtWidgets.QVBoxLayout()
 
-        model = pandasTableModel(df_to_plot)
-        if len(self.ui.tab_table.children()) > 0:
-            print(" existing")
-            self.ui.tab_table.children()[1].setModel(model)
-        else:
-            mainLayout = QtWidgets.QVBoxLayout()
+                view = QtWidgets.QTableView()
+                view.setModel(model)
 
-            view = QtWidgets.QTableView()
-            view.setModel(model)
+                mainLayout.addWidget(view)
 
-            print("")
-            #view.model.
-
-            mainLayout.addWidget(view)
-
-            self.ui.tab_table.setLayout(mainLayout)
+                self.ui.tab_table.setLayout(mainLayout)
+        except Exception as ex:
+            logger.warning(ex)
+            pass
 
     def display_tab_graph(self, uid):
 

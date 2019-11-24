@@ -177,7 +177,7 @@ def ulog_to_df(file_path):
         # Create DataFrame 
         dfi = pd.DataFrame(data) 
         logger.debug('\n--------\n DF for : ' + str(key))
-        logger.debug(dfi)
+        #logger.debug(dfi)
         
         #Merge Datafrme
         df_G=pd.merge(df_G, dfi, on="timestamp" ,how='outer')
@@ -217,7 +217,7 @@ def ulog_to_df(file_path):
     df_G.insert(1, 'time0_s', time0s)
 
 
-    print(df_G.info())
+    logger.debug(df_G.info())
 
     return df_G
 
