@@ -26,7 +26,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
    <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+    <set>QDialogButtonBox::Cancel</set>
    </property>
   </widget>
   <widget class="QLabel" name="label_log_file1">
@@ -408,6 +408,32 @@
    </property>
    <property name="orientation">
     <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_debug">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>660</y>
+     <width>90</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>debug</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_import">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>660</y>
+     <width>90</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Import</string>
    </property>
   </widget>
  </widget>

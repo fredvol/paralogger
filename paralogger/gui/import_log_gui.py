@@ -15,7 +15,7 @@ class Ui_Dialog_import_log(object):
         self.buttonBox = QtWidgets.QDialogButtonBox(Dialog_import_log)
         self.buttonBox.setGeometry(QtCore.QRect(350, 650, 131, 50))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel)
         self.buttonBox.setObjectName("buttonBox")
         self.label_log_file1 = QtWidgets.QLabel(Dialog_import_log)
         self.label_log_file1.setGeometry(QtCore.QRect(20, 350, 58, 16))
@@ -184,6 +184,12 @@ class Ui_Dialog_import_log(object):
         self.line_4.setFrameShape(QtWidgets.QFrame.HLine)
         self.line_4.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_4.setObjectName("line_4")
+        self.button_debug = QtWidgets.QPushButton(Dialog_import_log)
+        self.button_debug.setGeometry(QtCore.QRect(10, 660, 90, 28))
+        self.button_debug.setObjectName("button_debug")
+        self.button_import = QtWidgets.QPushButton(Dialog_import_log)
+        self.button_import.setGeometry(QtCore.QRect(230, 660, 90, 28))
+        self.button_import.setObjectName("button_import")
 
         self.retranslateUi(Dialog_import_log)
         self.buttonBox.accepted.connect(Dialog_import_log.accept)
@@ -215,4 +221,6 @@ class Ui_Dialog_import_log(object):
         self.label_file_log_2.setText(_translate("Dialog_import_log", "No file selected"))
         self.pushButton_import_file_video.setText(_translate("Dialog_import_log", "Browse"))
         self.label_file_video.setText(_translate("Dialog_import_log", "No file selected"))
+        self.button_debug.setText(_translate("Dialog_import_log", "debug"))
+        self.button_import.setText(_translate("Dialog_import_log", "Import"))
 

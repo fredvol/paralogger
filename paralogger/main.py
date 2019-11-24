@@ -434,5 +434,6 @@ if __name__ == '__main__':
 
 # MISC
 # pyuic5 paraloger_GUI1.ui > main_gui.py
+# pyuic5 import_log_GUI.ui > import_log_gui.py 
 # panda to table view:  https://stackoverflow.com/questions/44603119/how-to-display-a-pandas-data-frame-with-pyqt5-pyside2
 #
