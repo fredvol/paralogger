@@ -28,7 +28,7 @@ from logging.handlers import RotatingFileHandler
 
 os.environ["DISPLAY"] = ":0"  #Use for linux  on vscode at least
 
-__version__ = '0.1'
+__version__ = '0.1.0' #software_version, save file version , minor changes
 
 __pickle_file_version__ = 1
 
