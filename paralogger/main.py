@@ -155,8 +155,13 @@ class Prog(QtGui.QMainWindow):
         widget_import_new = import_log_diaglog()
         widget_import_new.exec_()
         logger.debug("back in main prog")
-        self.flight = widget_import_new.imported_Flight
-        self.update_project_tree()
+        try:
+            self.flight = widget_import_new.imported_Flight
+            self.update_project_tree()
+        except Exception as ex:
+            logger.warning(ex)
+        
+        
 
 
     def about_popup(self):
