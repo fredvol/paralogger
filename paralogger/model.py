@@ -7,9 +7,14 @@ import os.path
 import random
 import string
 import time
-
+import sys
+import pkgutil
 import numpy as np
 import pandas as pd
+import pip
+
+import platform
+import json
 
 from import_ulog import ulog_list_data, ulog_param, ulog_to_df
 from list_param import Device, Kind, Position
@@ -74,6 +79,21 @@ def sha256sum(filename):
             h.update(mv[:n])
     return h.hexdigest()
 
+def getSystemInfo():
+        try:
+            info={}
+            info['platform']=platform.system()
+            info['platform-release']=platform.release()
+            info['platform-version']=platform.version()
+            info['architecture']=platform.machine()
+            info['processor']=platform.processor()
+
+            info['python version:'] =sys.version
+            info['modules:']=list(sys.modules.keys())
+
+            return json.dumps(info)
+        except Exception as e:
+            logging.exception(e)
 
 ############################# MAIN MODEL #############################
 
@@ -90,16 +110,18 @@ class Flight:
 
         self.manufacturer = None
         self.glider = None
+        self.size = None
         self.modif = None
         self.pilot = None
         self.weight = None
         self.location = None
+        self.laboratory = None
 
         self.data = []
 
         self.sections = []
 
-        self.version = 1  # version of the data model
+        self.flight_version = 1  # version of the data model
 
     @timeit
     def add_data_file(self, mfilePath, mdevice, mposition):
@@ -109,40 +131,76 @@ class Flight:
 
         self.data.append(mData_File)
 
-    def add_info(self, mmanufacturer, mglider, mmodif, mpilot, mweight, mlocation):
+    def add_info(self, mmanufacturer, mglider,msize, mmodif, mpilot, mweight, mlocation,mlabo):
         self.manufacturer = mmanufacturer
         self.glider = mglider
+        self.size = msize
         self.modif = mmodif
         self.pilot = mpilot
         self.weight = mweight
         self.location = mlocation
+        self.laboratory = mlabo
+
 
     def get_df_by_position(self, mposition):
         df_to_return = []
         for dataf in self.data:
             if dataf.position == mposition:
                 df_to_return.append(dataf.df)
+            
         return df_to_return
 
-    def add_general_section(self):
+    def apply_section(self,uid,time_calibrate=5):
+
+        mSection= self.section_by_id(uid)
+        t_start,t_end = mSection.get_start_end()
+        t_start,t_end =float(t_start),float(t_end)
+        mdf = self.get_df_by_position(Position.PILOT)[0]
+        df_plot = mdf.loc[mdf["lat"].notnull()]
+
+        mSection.set_calibration(df_plot,t_start , t_start + time_calibrate)
+        dict_calibration = mSection.get_calibration() 
+
+
+        df_plot['pitch'] = df_plot['pitch'] - dict_calibration['pitch']
+        df_plot['roll'] = df_plot['roll'] - dict_calibration['roll']
+
+        mask = (df_plot["time0_s"] > t_start) & (df_plot["time0_s"] <= t_end)
+        df_plot_sel = df_plot.loc[mask].copy()
+
+        return df_plot_sel
+
+
+    def add_general_section(self , time_min=None ,time_max=None ):
+
         if not len(self.data)==0:
+            
             df=self.data[0].df   #TODO need to select the shorter one instead of the first one
-            time_min = df['time0_s'].min()
-            time_max = df['time0_s'].max()
+            
+            if time_min == None:
+                time_min = df['time0_s'].min()
+            if time_max == None:
+                time_max = df['time0_s'].max()
 
             mSection= Sections(time_min,time_max,Kind.MISC)
             self.sections.append(mSection)
             
-            
         else:
             logger.info("Impossible to create section, Data is empty")
+
+    def delete_section(self, uid):
+        self.sections = [i for i in self.sections if i.id!=uid]
+
+    def section_by_id(self, uid):
+        section_to_return = [i for i in self.sections if i.id == uid]
+        return section_to_return[0]  
 
 
 
 
 class Sections:
     def __repr__(self):
-        return str(self.__dict__)
+        return '%s (%s,%s) ' % (self.kind, self.start , self.end)
 
     def __init__(self, start = None , end=None , kind=None):
 
@@ -151,12 +209,12 @@ class Sections:
         self.start = start
         self.end = end
         self.version = 1  # version of the Sections model
-        self.calibrate={"pitch" : 0 , "roll" :0 , "yaw" : 0 }
+        self.calibration = {"pitch" : 0 , "roll" :0 , "yaw" : 0 }
 
     def get_start_end(self):
         return (self.start, self.end)
 
-    def get_calibration(self,df, t_start=0 ,t_end =5):
+    def set_calibration(self,df, t_start=0 ,t_end =5):
         mask = (df["time0_s"] > t_start) & (df["time0_s"] <= t_end)
 
 
@@ -164,19 +222,24 @@ class Sections:
         avg_roll = df.loc[mask, 'roll'].mean()
         avg_yaw = df.loc[mask, 'yaw'].mean()
 
-  
+        if (avg_pitch == None or avg_roll == None or avg_yaw == None):
+            logger.warning("Calibration failed section: " + self.__repr__)
+
         logger.info( " calibrating  from time0_s: " + str(t_start) + "s to : " + str(t_end) + " s" )
         logger.debug( ' avg_pitch :' + str(avg_pitch) + " rad so: " + str(np.rad2deg(avg_pitch)) + " deg")
         logger.debug( ' avg_roll :' + str(avg_roll) + " rad so: " + str(np.rad2deg(avg_roll)) + " deg")
         #logger.debug( ' avg_yaw :' + str(avg_yaw) + " rad so: " + str(np.rad2deg(avg_yaw)) + " deg" + " wanted (deg): "+ str(start_yaw_angle_deg))
-
+        
+        self.calibration = {"pitch" : avg_pitch , "roll" :avg_roll , "yaw" : avg_yaw }
         return {"pitch" : avg_pitch , "roll" :avg_roll , "yaw" : avg_yaw }
+    
+    def get_calibration(self):
+        return self.calibration
 
         
 
 class Data_File:
-    def __repr__(self):
-        return str(self.__dict__)
+
 
     def __init__(self, mfilePath, mdevice, mposition):
         logger.info("Data_File ")
@@ -195,6 +258,9 @@ class Data_File:
         self.file_sha1 = sha256sum(self.file_path)
 
         self.file_date = time.ctime(os.path.getctime(self.file_path))
+
+    def __repr__(self):
+        return '%s (%s) ' % (self.position, str(self.df.shape))
 
     def populate_df(self):
         logger.info("populate_df ")
@@ -223,3 +289,20 @@ class Data_File:
         )
 
         return {"timestamp_start": timestamp_start, "timestamp_end": timestamp_end}
+
+class Video_File:
+    def __repr__(self):
+        return '%s' % (self.device)
+
+    def __init__(self, mfilePath, mdevice):
+        logger.info("Data_File ")
+
+        self.version = 1  # version of the Data_File model
+        self.file_path = mfilePath
+        self.file_date = None
+        self.file_sha1 = None
+        self.device = mdevice
+
+        self.file_sha1 = sha256sum(self.file_path)
+
+        self.file_date = time.ctime(os.path.getctime(self.file_path))

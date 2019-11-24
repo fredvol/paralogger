@@ -177,7 +177,7 @@ def ulog_to_df(file_path):
         # Create DataFrame 
         dfi = pd.DataFrame(data) 
         logger.debug('\n--------\n DF for : ' + str(key))
-        logger.debug(dfi)
+        #logger.debug(dfi)
         
         #Merge Datafrme
         df_G=pd.merge(df_G, dfi, on="timestamp" ,how='outer')
@@ -194,10 +194,11 @@ def ulog_to_df(file_path):
     df_G['q[2]'].interpolate(method='linear',inplace=True)
     df_G['q[3]'].interpolate(method='linear',inplace=True)
 
+    #Find first row with quaternion
+    df_G.dropna(subset=['q[0]'], inplace=True)
 
     ## Create additional data
     #Created a time 0 column
-    
     df_G['time0_s']= (df_G['timestamp'] - df_G.iloc[0]['timestamp'])/10**6  #timestamp are in micro second
 
     # Compute nb of G
@@ -216,7 +217,7 @@ def ulog_to_df(file_path):
     df_G.insert(1, 'time0_s', time0s)
 
 
-    print(df_G.info())
+    logger.debug(df_G.info())
 
     return df_G
 

@@ -8,6 +8,7 @@ import time
 
 import numpy as np
 import pandas as pd
+import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 
 import pyqtgraph as pg
@@ -40,7 +41,7 @@ df_plot = mdf.loc[mdf["lat"].notnull()]
 
 #Clibrate it
 if 1 : 
-    dict_calibration = mflight.sections[0].get_calibration(mdf,t_start , t_start+5)
+    dict_calibration = mflight.sections[0].set_calibration(mdf,t_start , t_start+5)
     print(dict_calibration)
     df_plot['pitch'] = df_plot['pitch'] - dict_calibration['pitch']
     df_plot['roll'] = df_plot['roll'] - dict_calibration['roll']

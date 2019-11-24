@@ -62,7 +62,7 @@ def load_file(ulog_file_path, reload=True):
         mflight = Flight()
 
         mflight.add_data_file(ulog_file_path, Device.PIXRACER, Position.PILOT)
-        mflight.add_info("Tulipe Glider", "Razor4", None, "Paul", 94.2, "Nice Place")
+        mflight.add_info("Tulipe Glider", "Razor4", None, "Paul", 94.2, "Nice Place","goodplace","goodlab")
         mflight.add_general_section()
 
         logger.info("Writing : " + name_saved_file)
