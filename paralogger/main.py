@@ -38,6 +38,9 @@ log_file_name = "main_paralogger.log"
 
 
 def config_logger():
+    """Logger configuration.
+    log in a file + send to debug console + send to log tab in the app
+    """
     logger = logging.getLogger()
     # logging.basicConfig(filename='1_import.log',level=logging.DEBUG)
     logger.setLevel(logging.DEBUG)
@@ -58,6 +61,15 @@ logger = config_logger()
 
 
 class Prog(QtGui.QMainWindow):
+    """This is the MAIN program, this is the start point,
+     nothing should be calle from doutside of this class.
+    
+    Arguments:
+        QtGui.QMainWindow {QMainWindow object } -- QMainWindow legacy
+    
+    Returns:
+        [None] -- Just run until it closed
+    """
     def __init__(self):
         super().__init__(None)
 
@@ -82,7 +94,7 @@ class Prog(QtGui.QMainWindow):
 
         #Set up variable
         self.flight = None
-        self.visualizer_3d = None
+        self.visualizer_3d = None        
 
         #add Action
         self.ui.actionOpen.triggered.connect(self.open_pickle_file)
@@ -104,13 +116,20 @@ class Prog(QtGui.QMainWindow):
         self.ui.tableView.setModel(self.ui.model)  # SETTING THE MODEL
         self.ui.model.dataChanged.connect(self.on_datachange_model)
 
-    def debug(self):
+        def debug(self):
         ''' only use for speed up de developement
         '''
         self.open_pickle_file("mflight_plot_V1.pkl")
 
-    def open_pickle_file(self, filename=None):
-        logger.debug(" Menu :  open")
+    def open_pickle_file(self, filename=None): 
+    """Function to import a file already saved, format is classic python pickle
+    
+    Keyword Arguments:
+        filename {[str]} -- if a path is given the browse dialog do not open ( use for debug function) (default: {None})
+    
+    Returns:
+        [None] -- But saved the nex loaded flight in the main self.Flight object.
+    """            
 
         if filename == False:
             filename = QtGui.QFileDialog.getOpenFileName(self, 'Open pickler File', "", 'Pickle Files (*.pkl)')
