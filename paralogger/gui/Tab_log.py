@@ -1,3 +1,12 @@
+#coding:utf-8
+"""
+PARALOGER ANALYSIS 
+
+Log Tab
+Diplay log information 
+
+"""
+
 import sys
 from PyQt5 import QtWidgets
 import logging

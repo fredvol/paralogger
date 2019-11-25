@@ -1,4 +1,17 @@
 
+#coding:utf-8
+"""
+PARALOGER ANALYSIS 
+
+Table Tab
+Generated the widget emmbeded in the main display windows , on the Table tab
+Create a table view of the dataframe of  the object
+
+TODO Find how to  manage with several dataframe  attached to a FLIGHT?
+
+
+"""
+
 import pandas as pd
 from PyQt5.QtWidgets import QApplication, QTableView
 from PyQt5.QtCore import QAbstractTableModel, Qt

@@ -1,6 +1,14 @@
+#coding:utf-8
 """
-    Animated 3D sinc function
+PARALOGER ANALYSIS 
+
+Tab 3D
+Generated the widget emmbede in the main display windows , on the 3D tab
+Cretaed a 3D view of the section and some live graph around
+
+TODO Pass the layout using Area from pyqtGrpah for more flexibily
 """
+
 
 import itertools
 import os
@@ -24,19 +32,12 @@ try:
 except:
     pass
 
-# import pkg_resources
 
-# resource_package = __name__
-
-# def get_source_name(file_path_name):
-#     return pkg_resources.resource_filename(resource_package,file_path_name)
-
-# m1 = gl.GLMeshItem(meshdata=md, smooth=False, drawFaces=False, drawEdges=True, edgeColor=(1,1,0,1))
-
+#### FUNCTIONS ###########################""
 
 def WGS84_to_mercator(lon, lat):
     """ Convert lon, lat in [deg] to Mercator projection 
-    from https://review.px4.io/
+    Code imported from  https://review.px4.io/
     """
     # alternative that relies on the pyproj library:
     # import pyproj # GPS coordinate transformations
@@ -55,7 +56,9 @@ def WGS84_to_mercator(lon, lat):
 
 
 def map_projection(lat, lon, anchor_lat, anchor_lon):
-    """ convert lat, lon in [rad] to x, y in [m] with an anchor position """
+    """ convert lat, lon in [rad] to x, y in [m] with an anchor position 
+        Code imported from  https://review.px4.io/
+        """
     sin_lat = np.sin(lat)
     cos_lat = np.cos(lat)
     cos_d_lon = np.cos(lon - anchor_lon)
@@ -83,6 +86,14 @@ def map_projection(lat, lon, anchor_lat, anchor_lon):
 
 
 def prepare_data(mdf):
+    """Prepare the data for the 3D  plot
+    
+    Arguments:
+        mdf {DataFrame} -- imput dataframe 
+    
+    Returns:
+        Dataframe -- modified dataframe ( TODO need to check if copy or view?)
+    """
     mdf[["pitch", "yaw", "roll"]] = mdf[["pitch", "yaw", "roll"]].apply(np.rad2deg)
 
     # Work on Gps coordinate
@@ -116,6 +127,16 @@ def prepare_data(mdf):
 
 
 def add_plot(mdf, widget):
+    """Add graph plot  at the botton
+    
+    Arguments:
+        mdf {DataFrame} -- Dataframe to use for ploting
+        widget {[type]} -- Widget to add the plot in
+    
+    Returns:
+        Add the plot in the widget 
+        [Dict ] -- Dict the arrow object for reuse later  during the update loop
+    """
     # # Set up each plot
     color = (0, 255, 120)
 
@@ -160,6 +181,9 @@ def add_plot(mdf, widget):
 
 
 class Visualizer3D(object):
+    """Main classe generating the 3D view
+    
+    """
     def __init__(self, parent):
         self.traces = dict()
         #self.app = QtGui.QApplication(sys.argv)
@@ -256,15 +280,9 @@ class Visualizer3D(object):
             logger.info("Exit")
 
 
-
-        # SI c'est pas commenter , message d'erreur, mais le coeur du problem est la ! 
-
-        # if (sys.flags.interactive != 1) or not hasattr(QtCore, "PYQT_VERSION"):
-        #    # sys.exit(QtGui.QApplication.instance().exec_())
-        #    QtGui.QApplication.instance().exec_()
-        #    print("Exit")
-
     def update(self):
+        """Function called on each animation iteration
+        """
 
         self.index = (self.index + 1) % len(self.df)
 
@@ -272,9 +290,9 @@ class Visualizer3D(object):
         if i == 0:
             print("... loop animation ...")
 
-        time00 = self.df["time0_s"].iloc[0]
+        time00 = self.df["time0_s"].iloc[0]  #The loag relative time where the section start ( ex: 16.24s)
 
-        time0_s = self.df["time0_s"].iloc[i]
+        time0_s = self.df["time0_s"].iloc[i]   
 
         time_simu = i * self.step_interval
         diff_time = time_simu - time0_s + time00
@@ -320,6 +338,8 @@ class Visualizer3D(object):
 
 
     def animation(self, mdata, plot_track, timer=None):
+        """ Prepare the animation
+        """
 
         print("total records:" + str(len(mdata)))
 
@@ -344,10 +364,12 @@ class Visualizer3D(object):
         self.start()
 
 
-# Start Qt event loop unless running in interactive mode.
+# Start Qt event loop unless running in interactive mode. 
 if __name__ == "__main__":
-    # Load dummy file
-    # DO NOT WORK
+    """Function use to run a 3D as standalone file ( for debuging)
+    """
+    # Load dummy file 
+
     import sys
 
     os.environ["DISPLAY"] = ":0"

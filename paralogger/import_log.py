@@ -1,8 +1,9 @@
+#coding:utf-8
 """
-Import and log file 
+PARALOGER ANALYSIS 
 
-Fred
-24/11/2019
+File generating the Import log dialog in the GUI.
+
 """
 
 import os
@@ -66,6 +67,8 @@ class import_log_diaglog(QDialog):
 
 
     def debug_(self):
+        """Quickly populate all flied for rapid debug
+        """
         logger.debug("Populate with dummy values")
         file_name = "/home/fred/Ozone/paralogger/paralogger/samples/log_6_2019-11-6-13-32-36_flight_1.ulg"
 
@@ -93,6 +96,9 @@ class import_log_diaglog(QDialog):
 
 
     def import_flight(self):
+        """Create a Flight object, read the raw log file and add meta data .
+        TODO mange if device != Pixracer 
+        """
         
         self.update_label_status("Loading in progress, please wait  ...")
         self.update()
@@ -127,6 +133,8 @@ class import_log_diaglog(QDialog):
 
 
     def check_valid(self):
+        """Check if the  required field and ok  to enble the import.
+        """
         check_list=[]
         item_to_check = [self.ui.gliderModelLineEdit,
                         self.ui.label_file_log_1

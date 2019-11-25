@@ -1,5 +1,12 @@
+#coding:utf-8
 """
-    Animated 3D sinc function
+PARALOGER ANALYSIS 
+
+Graph Tab
+Generated the widget emmbeded in the main display windows , on the Grpah tab
+Cretaed a 2D graph of selected Section 
+
+? maybe the graph creation can be interactive? or parameters in a seperated file ?
 """
 
 import itertools
@@ -78,9 +85,5 @@ def generated_layout(mdf):
         area = QLabel()
         area.setText ("No valid data")
 
-
-
-
-    
     return area
 

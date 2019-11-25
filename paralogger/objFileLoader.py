@@ -30,8 +30,9 @@ from OpenGL.GLU import *
 
 class objObject:
     """ Class to import OBJ  file ,
-    Need to be clean
-    Originaly imported from pyFlightAnalysis :
+    Need to be cleaned
+
+    Originaly imported from pyFlightAnalysis ( Thanks) :
     https://github.com/Marxlp/pyFlightAnalysis/blob/master/src/objloader.py
     """
 

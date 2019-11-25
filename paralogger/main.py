@@ -2,38 +2,34 @@
 """
 PARALOGER ANALYSIS 
 
-License GPL V3
+Main file , start Point.
 
 """
-import sys
-import os
-import time
-import pickle
+__credits__ = ["Mattleg", "Bruno D", "Fred P"]
+__license__ = "GPL V3"
+__version__ = '0.1.0'
+__pickle_file_version__ = 1  #This will help to detect previous version of pkl file when imported
 
+import logging
+import os
+import pickle
+import platform
+import sys
+import time
+from logging.handlers import RotatingFileHandler
 
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 
 from gui.main_gui import Ui_MainWindow
-from import_log import import_log_diaglog
-
-from model import timeit, Flight, Sections ,getSystemInfo
-from list_param import Position
 from gui.Tab_3D import Visualizer3D
 from gui.Tab_Graph import generated_layout
-from gui.Tab_Table import pandasTableModel
 from gui.Tab_log import QTextEditLogger
-
-import logging
-import platform
-
-from logging.handlers import RotatingFileHandler
+from gui.Tab_Table import pandasTableModel
+from import_log import import_log_diaglog
+from list_param import Position
+from model import Flight, Sections, getSystemInfo, timeit
 
 os.environ["DISPLAY"] = ":0"  #Use for linux  on vscode at least
-
-__version__ = '0.1.0' #software_version, save file version , minor changes
-
-__pickle_file_version__ = 1
-
 
 
 log_file_name = "main_paralogger.log"
@@ -118,20 +114,20 @@ class Prog(QtGui.QMainWindow):
         self.ui.tableView.setModel(self.ui.model)  # SETTING THE MODEL
         self.ui.model.dataChanged.connect(self.on_datachange_model)
 
-        def debug(self):
-        ''' only use for speed up de developement
-        '''
-        self.open_pickle_file("mflight_plot_V1.pkl")
+    def debug(self):
+        """misc function , only use for speed up de developement.
+        """
+        self.open_pickle_file("demo1.pkl")
 
     def open_pickle_file(self, filename=None): 
-    """Function to import a file already saved, format is classic python pickle
-    
-    Keyword Arguments:
-        filename {[str]} -- if a path is given the browse dialog do not open ( use for debug function) (default: {None})
-    
-    Returns:
-        [None] -- But saved the nex loaded flight in the main self.Flight object.
-    """            
+        """Function to import a file already saved, format is classic python pickle .pkl
+        
+        Keyword Arguments:
+            filename {[str]} -- if a path is given the browse dialog do not open ( use for debug function) (default: {None})
+        
+        Returns:
+            [None] -- But saved the nex loaded flight in the main self.Flight object.
+        """            
 
         if filename == False:
             filename = QtGui.QFileDialog.getOpenFileName(self, 'Open pickler File', "", 'Pickle Files (*.pkl)')
@@ -159,6 +155,8 @@ class Prog(QtGui.QMainWindow):
                 logger.error(ex)
 
     def save_pickle_file(self):
+        """Save the current self.Flight object to a pickle file. (.pkl)
+        """
         try:
             tuple_saved_file = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '', 'Pickle(*.pkl)')
             name_saved_file = tuple_saved_file[0] + '.pkl'
@@ -170,37 +168,35 @@ class Prog(QtGui.QMainWindow):
             logger.error(ex)
     
     def import_log_window(self):
-        # If you pass a parent (self) will block the Main Window,
-        # and if you do not pass both will be independent,
-        # I recommend you try both cases.
+        """Function will display a other dialog to fill for loading a raw  log file
+        the dialog will auto close when the import is finish.
+        """
         widget_import_new = import_log_diaglog()
         widget_import_new.exec_()
         logger.debug("back in main prog")
-        try:
+        try:  # try to copy the flight object from the dialog windows to the main Flight object
             self.flight = widget_import_new.imported_Flight
             self.update_project_tree()
         except Exception as ex:
             logger.warning(ex)
         
-        
-
 
     def about_popup(self):
         """ About section 
-        Display various info  for debug and  log file details
+        Display various info for debug and system details
+        TODO ; having a better list of the enviroment module and their version.
         """
 
         # from https://stackoverflow.com/questions/54447535/how-to-fix-typeerror-in-qtwidgets-qmessagebox-for-popup-messag
         cwd = os.path.dirname(os.path.abspath(__file__))
-        log_file_path = ulog_file_path = os.path.join(cwd, log_file_name)
-
         
         log_content = getSystemInfo()
 
         msg = QtWidgets.QMessageBox()
         msg.setIcon(QtWidgets.QMessageBox.Information)
         msg.setText("Version : " + str(__version__) + "\n"
-                    "Log file name: " + str(log_file_name) + "\n"
+                    "pkl file version: " + str(log_file_name) + "\n"
+                    "Log file name: " + str(__pickle_file_version__) + "\n"
                     "curent working directory: " + str(cwd))
         msg.setInformativeText("More info on :\nhttps://github.com/fredvol/paralogger ")
         msg.setWindowTitle("About")
@@ -210,13 +206,21 @@ class Prog(QtGui.QMainWindow):
         retval = msg.exec_()
 
     def openUrl_help(self):
+        """Open github page in browser
+        """
         url = QtCore.QUrl('https://github.com/fredvol/paralogger')
         if not QtGui.QDesktopServices.openUrl(url):
             QtGui.QMessageBox.warning(self, 'Open Url', 'Could not open url')
 
-    ### TREE VIEW
+
+
+    ### TREE VIEW  ###
+    # Tree view will display the flight and all the sections attach to. 
+    
     def update_project_tree(self):
-        logger.info("load_project_tree")
+        """repopulated the tree view , to show modif.
+        """
+        logger.info("update_project_tree")
         tw = self.ui.treeWidget
         tw.clear()
         l1 = QtWidgets.QTreeWidgetItem([self.flight.glider, "--", self.flight.id])
@@ -229,6 +233,16 @@ class Prog(QtGui.QMainWindow):
         tw.expandAll()
 
     def get_level_from_index(self, indexes):
+        """Return the level in the treeview
+        level 0 = Flight
+        level 1 = Section
+        
+        Arguments:
+            indexes {[QModelIndex]} -- not realy clear for me !
+        
+        Returns:
+            level [Int]  -- The level of the cliked item
+        """
 
         if len(indexes) > 0:
 
@@ -244,17 +258,26 @@ class Prog(QtGui.QMainWindow):
 
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem, int)
     def onTreeItemClicked(self, it, col):
+        """function trigered when an object is cliked on the tree view
+        This a central function which dispath the work to the other objects .
+        
+        Arguments:
+            it {QTreeWidgetItem} -- item cliked
+            col {int} -- index of  columns cliked
+        """
 
         indexes = self.ui.treeWidget.selectedIndexes()
 
         level = self.get_level_from_index(indexes)
 
-        if level >= 0:
+        if level >= 0: # if a Flight or a Section
             uid = it.text(2)  # The text of the node.
             logger.debug("clicked: " + str(it) + ", " + str(col) + ", " + str(uid) + " level: " + str(level))
         else:
             uid = None
 
+
+        #Job dispatching
         if level == 0:  # flight  level
             self.populate(uid, level)
             self.display_tab_Table(None)
@@ -268,17 +291,21 @@ class Prog(QtGui.QMainWindow):
             self.populate(uid, level)
 
     def openMenu(self, position):
+        """Open contextual menu in tree View widget
+        
+        Arguments:
+            position {[type]} -- [description]
+        """
         indexes = self.ui.treeWidget.selectedIndexes()
         item = self.ui.treeWidget.itemAt(position)
-        #
 
         menu = QtWidgets.QMenu()
 
         level = self.get_level_from_index(indexes)
         if level > 0 and item != None:
-            uid = item.text(2)  # The text of the nodel
+            uid = item.text(2)  # The UId of teh object
 
-        if level == 0:
+        if level == 0:  # Flight
             action_add = menu.addAction(self.tr("Add Section"))
             action_add.triggered.connect(self.add_section)
             action_refresh = menu.addAction(self.tr("Refresh"))
@@ -290,7 +317,7 @@ class Prog(QtGui.QMainWindow):
             action_export_xls = menu.addAction('Export XLSX')
             action_export_xls.triggered.connect(lambda: self.export_df(expformat="xlsx"))
 
-        elif level == 1:
+        elif level == 1: #Section
             action_export_csv = menu.addAction('Export CSV')
             action_export_csv.triggered.connect(lambda: self.export_df(uid,expformat="csv"))
 
@@ -306,16 +333,32 @@ class Prog(QtGui.QMainWindow):
         menu.exec_(self.ui.treeWidget.viewport().mapToGlobal(position))
 
     def delete_section(self, uid):
+        """Delete the a Section from the self.Flight and refresh
+        
+        Arguments:
+            uid {Str} -- Uid of the Section to delete
+        """
         logger.info("delete section :" + str(uid))
         self.flight.delete_section(uid)
         self.update_project_tree()
 
     def add_section(self):
+        """Add a section in self.Flight
+        By default  there start from 0 to the end.
+        """
         logger.info("add section")
         self.flight.add_general_section()
         self.update_project_tree()
 
     def export_df(self,uid = None, expformat="csv"):
+        """Export Dataframe  in different format
+        
+        Keyword Arguments:
+            uid {str} -- Uid of the Section to export (default: {None})
+            expformat {str} -- Format to export [csv , xlsx] (default: {"csv"})
+        
+        If UID is None then export the flight ( maybe change to use the level info, to be consitent)
+        """
         # TODO add multi sheet( xlsx) or file (csv) if multi data_file in flight
         if uid != None:  # if it is a section
             df_to_export = self.flight.apply_section(uid)
@@ -335,9 +378,18 @@ class Prog(QtGui.QMainWindow):
 
             
 
-    #### TAB WIDGET ACTIONS
+    #### TAB WIDGET ACTIONS ###
+    # This section manage all the Tab ins the view part of the main windows.
 
     def display_tab_3D(self, uid):
+        """Call the Tab_3d.py  and generated a 3D view .
+        
+        Arguments:
+            uid {str} -- id of the Section to display
+        Nothing append if Flight is selected, only for Sections
+
+        TODO reload data when other section are cliked ( only display the first cliked one)
+        """
 
         df_to_plot = self.flight.apply_section(uid)
 
@@ -353,6 +405,15 @@ class Prog(QtGui.QMainWindow):
         self.ui.tab_3d.setLayout(self.visualizer_3d.layout_general)
 
     def display_tab_Table(self, uid):
+        """ Display the Pilot dataframe  in a table
+        
+        Arguments:
+            uid {str} -- id of the Section to display
+
+        For Flight and Section.
+        ! only for dataframe  at pilot position
+        TODO : Manage if no pilot position is available
+        """
         try:
             if uid != None:  # if it is a section
                 df_to_plot = self.flight.apply_section(uid)
@@ -376,6 +437,14 @@ class Prog(QtGui.QMainWindow):
             pass
 
     def display_tab_graph(self, uid):
+        """PLot different Graph 
+
+        Arguments:
+            uid {str} -- id of the Section to display
+        
+        Work only for Section
+        TODO: Display full Flight with the section part Highlighted.
+        """
 
         df_to_plot = self.flight.apply_section(uid)
         inside_widget = generated_layout(df_to_plot)
@@ -401,10 +470,15 @@ class Prog(QtGui.QMainWindow):
     ## DETAILS OBJECT
 
     def on_datachange_model(self, signal):
-        row = signal.row()  # RETRIEVES ROW OF CELL THAT WAS DOUBLE CLICKED
-        column = signal.column()  # RETRIEVES COLUMN OF CELL THAT WAS DOUBLE CLICKED
-        cell_dict = self.ui.model.itemData(signal)  # RETURNS DICT VALUE OF SIGNAL
-        cell_value = cell_dict.get(0)  # RETRIEVE VALUE FROM DICT
+        """Function use to update the self.Flight object  when a value is changed in the Detail table view
+        
+        Arguments:
+            signal {QModelIndex} -- Index of the modified cell
+        """
+        row = signal.row()  # retrieves row of cell that was double clicked
+        column = signal.column()  # retrieves column of cell that was double clicked
+        cell_dict = self.ui.model.itemdata(signal)  # returns dict value of signal
+        cell_value = cell_dict.get(0)  # retrieve value from dict
 
         uid = self.ui.model.itemData(signal.sibling(0, 1)).get(0)
 
@@ -426,12 +500,18 @@ class Prog(QtGui.QMainWindow):
         self.update_project_tree()
 
     def populate(self, uid, level):
-        """ Add data in the Table view , via model
-        """
-        # MODEL ONLY ACCEPTS STRINGS - MUST CONVERT.
 
-        logger.debug("display_properties: " + str(uid))
-        self.ui.model.clear()
+        """ Add data in the Table view , via model 
+        Exxtract a Dict of of a object properties.
+        ! model only accepts strings - must convert.
+ 
+        Arguments:
+            uid {str} -- ID of the object to display
+            level {int} -- object cliked level ( FLight or Section)
+        """
+
+        logger.debug("display_properties of: " + str(uid))
+        self.ui.model.clear() # Clear th UI model notthe self.Flight
 
         if level == 0:
             dict_to_display = vars(self.flight)
@@ -459,6 +539,8 @@ def main():
 
 
 if __name__ == '__main__':
+    """Absolute Start Point of the universe!
+    """
     main()
 
 # MISC

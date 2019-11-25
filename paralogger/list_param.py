@@ -1,4 +1,15 @@
-############################# TOOLS CLASS #############################
+#coding:utf-8
+"""
+PARALOGER ANALYSIS 
+
+Parameters list :
+Classe use to ensure a consistence between all modeule/files , regarding the parameters name.
+
+"""
+
+
+
+############################# PARAMETERS CLASS #############################
 
 class Device():
     SENSBOX = "Sensbox (not suported)"

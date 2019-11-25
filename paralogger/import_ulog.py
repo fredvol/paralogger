@@ -1,4 +1,10 @@
-#! /usr/bin/env python
+#coding:utf-8
+"""
+PARALOGER ANALYSIS 
+
+File importing PX4 log.
+
+"""
 
 import numpy as np
 import pandas as pd
@@ -16,7 +22,7 @@ from functools import lru_cache
 
 ###  DECORATOR ####
 
-def timeit(method):
+def timeit(method):    # TODO use the one in model.py instead
     def timed(*args, **kw):
         ts = time.time()
         result = method(*args, **kw)
@@ -92,9 +98,9 @@ gravity = 9.80665 #m·s-2
 #################################################################
 @timeit
 def ulog_list_data(file_path):
-    """ Create a panada dataframe with all the record avaible,
+    """ Create a panda dataframe with all the record avaible,
      the number and frequency.
-        """
+    """
     logger.info("\n Ulog ulog_list_data: " +str(file_path))
 
     ulog = load_ulog_file(file_path)
@@ -124,7 +130,7 @@ def ulog_list_data(file_path):
 
 def ulog_param(file_path):
     """ Extract all the parameters of the Ulog
-        """
+    """
 
     logger.info("\n Ulog_param: " +str(file_path))
     dict_param={}

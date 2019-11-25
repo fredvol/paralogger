@@ -1,6 +1,11 @@
-# -*- coding: utf-8 -*-
+#coding:utf-8
 """
-    Creating Geometry
+PARALOGER ANALYSIS 
+
+Geometry modeling:
+Classe use to created geometry for the 3D view
+
+
 """
 
 import pyqtgraph.opengl as gl
@@ -20,6 +25,11 @@ class Create_geom:
 
     @staticmethod
     def cylinder():
+        """Easy shape , cylinder
+        
+        Returns:
+            gl.GLMeshItem 
+        """
         md = gl.MeshData.cylinder(rows=10, cols=20, radius=[1.0, 1.0], length=3.0)
 
         geom = gl.GLMeshItem(
@@ -34,6 +44,11 @@ class Create_geom:
 
     @staticmethod
     def cube():
+        """Easy shape , Cube
+        
+        Returns:
+            gl.GLMeshItem 
+        """
         vertexes = np.array(list(itertools.product(range(2), repeat=3)))
 
         faces = []
@@ -60,7 +75,12 @@ class Create_geom:
     def obj(fpath):
         """ Load from Waveform OBJ format 
         Should be triangulated
+
+        
+        Returns:
+            gl.GLMeshItem 
         """
+
         obj = objObject()
         obj.loadFile(fpath)
         print(obj)
