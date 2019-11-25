@@ -1,7 +1,9 @@
 #coding:utf-8
 """
 PARALOGER ANALYSIS 
-Fred - 7/11/2019
+
+License GPL V3
+
 """
 import sys
 import os
