@@ -15,7 +15,7 @@ import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 from PyQt5.QtCore import QSize
 
-from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget, QTabWidget)
+from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget, QTabWidget, QPushButton)
 from pyqtgraph.Qt import QtCore, QtGui
 
 try:
@@ -161,8 +161,8 @@ def add_plot(mdf, widget):
 
 class Visualizer3D(object):
     def __init__(self, parent):
-        self.traces = dict()
-        #self.app = QtGui.QApplication(sys.argv)
+
+
 
         #Main Widget containing everything
 
@@ -175,13 +175,44 @@ class Visualizer3D(object):
         self.layout_top = QHBoxLayout()
         self.layout_general.addLayout(self.layout_top, 70)
 
-        #Top Layout
+        #Bottom Layout
         self.layout_bottom = QHBoxLayout()
         self.layout_general.addLayout(self.layout_bottom, 30)
 
+        #Left top layout
+        self.top_left = QVBoxLayout()
+
+        # add buttons for time control:
+        self.button_reset = QPushButton()
+        self.button_reset.setText("Reset")
+        self.button_reset.clicked.connect(self.on_click_reset)
+
+        self.button_backward = QPushButton()
+        self.button_backward.setText("<<")
+        self.button_backward.clicked.connect(self.on_click_backward)
+
+        self.button_forward = QPushButton()
+        self.button_forward.setText(">>")
+        self.button_forward.clicked.connect(self.on_click_forward)
+
+        self.button_stop = QPushButton()
+        self.button_stop.setText("||")
+        self.button_stop.clicked.connect(self.on_click_stop)
+
+        self.button_play = QPushButton()
+        self.button_play.setText(">")
+        self.button_play.clicked.connect(self.on_click_play)
+
         # Live Data text area
         self.data_info_text = QLabel('Live Data info')
-        self.layout_top.addWidget(self.data_info_text, 15)  # 20% of the width
+        self.top_left.addWidget(self.data_info_text, 45)  # 20% of the width
+
+        self.top_left.addWidget(self.button_stop)  
+        self.top_left.addWidget(self.button_play)  
+        self.top_left.addWidget(self.button_backward)  
+        self.top_left.addWidget(self.button_forward)  
+        self.top_left.addWidget(self.button_reset)  
+        self.layout_top.addLayout(self.top_left, 15)  
 
         #Anim 3D
         # self.D3_holder = QWidget(parent=self.mainWidget )
@@ -189,7 +220,7 @@ class Visualizer3D(object):
         self.layout_top.addWidget(self.w, 85)  # 80% of the width
 
         # Plot
-        self.plots = pg.GraphicsWindow(title="Basic plotting examples")
+        self.plots = pg.GraphicsWindow(title="Basic plotting ")
         pg.setConfigOptions(antialias=True)
         self.layout_bottom.addWidget(self.plots, 20)  # 80% of the width
 
@@ -207,6 +238,7 @@ class Visualizer3D(object):
         self.track_is_ploted = False
         self.index = 0
         self.step_interval = None
+        self.play = True
 
         # Created the geometrie
         models_path = os.path.dirname(os.path.abspath(__file__))
@@ -233,6 +265,42 @@ class Visualizer3D(object):
         self.w.addItem(ax)
 
         self.w.addItem(self.geom)
+        
+    def on_click_reset(self):
+        logger.debug("reset self.index")
+        self.index = 0
+
+    def on_click_backward(self ):
+        logger.debug("backward - :" +str(50))
+        self.index -= 50
+
+    def on_click_forward(self ):
+        logger.debug("forward + :" +str(50))
+        self.index += 50
+    
+    def on_click_stop(self ):
+        logger.debug("stop ")
+        self.play = False
+
+    def on_click_play(self ):
+        logger.debug("play ")
+        self.play = True
+
+    def reset(self):
+        self.df = None
+        self.track = None
+        self.track_is_ploted = False
+        self.index = 0
+        self.step_interval = None
+
+        #empty actual area if exist
+        for i in reversed(range(self.layout_general.count())):
+            widgetToRemove = self.layout_general.itemAt(i).widget()
+            # remove it from the layout list
+            self.layout_general.removeWidget(widgetToRemove)
+            # remove it from the gui
+            widgetToRemove.setParent(None)
+        self.layout_general.addWidget(inside_widget)
 
     def extract_path_track(self):
         logger.info("add_path_track ")
@@ -256,66 +324,58 @@ class Visualizer3D(object):
             logger.info("Exit")
 
 
-
-        # SI c'est pas commenter , message d'erreur, mais le coeur du problem est la ! 
-
-        # if (sys.flags.interactive != 1) or not hasattr(QtCore, "PYQT_VERSION"):
-        #    # sys.exit(QtGui.QApplication.instance().exec_())
-        #    QtGui.QApplication.instance().exec_()
-        #    print("Exit")
-
     def update(self):
 
-        self.index = (self.index + 1) % len(self.df)
+        if self.play:
 
-        i = self.index
-        if i == 0:
-            print("... loop animation ...")
+            self.index = (self.index + 1) % len(self.df)
+            i = self.index
 
-        time00 = self.df["time0_s"].iloc[0]
+            if i == 0:
+                print("... loop animation ...")
 
-        time0_s = self.df["time0_s"].iloc[i]
+            time00 = self.df["time0_s"].iloc[0]
+            time0_s = self.df["time0_s"].iloc[i]
+            time_simu = i * self.step_interval
+            diff_time = time_simu - time0_s + time00
 
-        time_simu = i * self.step_interval
-        diff_time = time_simu - time0_s + time00
+            pitch = self.df["pitch"].iloc[i]
+            roll = self.df["roll"].iloc[i]
+            yaw = self.df["yaw"].iloc[i]
+            lat = self.df["lat_m"].iloc[i]
+            lon = self.df["lon_m"].iloc[i]
+            alt = self.df["alt_m"].iloc[i]
 
-        pitch = self.df["pitch"].iloc[i]
-        roll = self.df["roll"].iloc[i]
-        yaw = self.df["yaw"].iloc[i]
-        lat = self.df["lat_m"].iloc[i]
-        lon = self.df["lon_m"].iloc[i]
-        alt = self.df["alt_m"].iloc[i]
+            #Update Text data
+            self.data_info_text.setText(f'i: \t {i} \n' + f'time simu: \t {time_simu:.2f} \n' +
+                                        f'time0_s: \t {time0_s:.2f} \n' + f'time diff: \t {diff_time:.2f} \n\n' +
+                                        f'pitch: \t {pitch:.1f} \n' + f'roll: \t {roll:.1f} \n' +
+                                        f'yaw: \t {yaw:.1f} \n\n' + f'x: \t {lat:.1f} \n' + f'y: \t {lon:.1f} \n' +
+                                        f'z: \t {alt:.1f} \n\n')
 
-        #Update Text data
-        self.data_info_text.setText(f'i: \t {i} \n' + f'time simu: \t {time_simu:.2f} \n' +
-                                    f'time0_s: \t {time0_s:.2f} \n' + f'time diff: \t {diff_time:.2f} \n\n' +
-                                    f'pitch: \t {pitch:.1f} \n' + f'roll: \t {roll:.1f} \n' +
-                                    f'yaw: \t {yaw:.1f} \n\n' + f'x: \t {lat:.1f} \n' + f'y: \t {lon:.1f} \n' +
-                                    f'z: \t {alt:.1f} \n\n')
+            #Update arrow:
+            self.custom['arrow_alt'].setPos(time0_s, alt)
+            self.custom['arrow_pitch'].setPos(time0_s, pitch)
+            self.custom['arrow_roll'].setPos(time0_s, roll)
+            self.custom['arrow_yaw'].setPos(time0_s, yaw)
 
-        #Update arrow:
-        self.custom['arrow_alt'].setPos(time0_s, alt)
-        self.custom['arrow_pitch'].setPos(time0_s, pitch)
-        self.custom['arrow_roll'].setPos(time0_s, roll)
-        self.custom['arrow_yaw'].setPos(time0_s, yaw)
+            #Update 3D body
+            self.geom.resetTransform()
+            # Important  to rotate before translated
+            self.geom.rotate(pitch, 0, 1, 0)
+            self.geom.rotate(roll, 1, 0, 0)
+            self.geom.rotate(yaw, 0, 0, 1)
 
-        #Update 3D body
-        self.geom.resetTransform()
-        # Important  to rotate before translated
-        self.geom.rotate(pitch, 0, 1, 0)
-        self.geom.rotate(roll, 1, 0, 0)
-        self.geom.rotate(yaw, 0, 0, 1)
+            self.geom.translate(lat, lon, alt)
 
-        self.geom.translate(lat, lon, alt)
+            self.geom.update()
 
-        self.geom.update()
-
-        # Add track if exist:
-        if self.track is not None and not self.track_is_ploted:
-            print("ploting track")
-            plt = gl.GLLinePlotItem(pos=self.track, antialias=True)
-            self.w.addItem(plt)
-            self.track_is_ploted = True
+            # Add track if exist:
+            if self.track is not None and not self.track_is_ploted:
+                print("ploting track")
+                plt = gl.GLLinePlotItem(pos=self.track, antialias=True)
+                self.w.addItem(plt)
+                self.track_is_ploted = True
 
 
 

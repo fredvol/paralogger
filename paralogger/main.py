@@ -103,6 +103,8 @@ class Prog(QtGui.QMainWindow):
         self.ui.model = QtGui.QStandardItemModel(self)  # SELECTING THE MODEL - FRAMEWORK THAT HANDLES QUERIES AND EDITS
         self.ui.tableView.setModel(self.ui.model)  # SETTING THE MODEL
         self.ui.model.dataChanged.connect(self.on_datachange_model)
+    
+
 
     def debug(self):
         ''' only use for speed up de developement
@@ -319,17 +321,17 @@ class Prog(QtGui.QMainWindow):
     def display_tab_3D(self, uid):
 
         df_to_plot = self.flight.apply_section(uid)
+        ####
+        #empty actual area if exist
+        if len(self.ui.tab_3d.children()) > 0:
+            print("not empty")
+            #self.visualizer_3d.reset()  WIP
+            #self.visualizer_3d.animation(df_to_plot, True, timer=self.timer)
 
-        # mainLayout = QtWidgets.QVBoxLayout()
-
-        self.visualizer_3d = Visualizer3D(self.ui.tab_3d)
-        # self.setCentralWidget(self.ui.main_tabWidget)
-
-        # mainLayout.addWidget(v.mainWidget)
-
-        self.visualizer_3d.animation(df_to_plot, True, timer=self.timer)
-
-        self.ui.tab_3d.setLayout(self.visualizer_3d.layout_general)
+        else:
+            self.visualizer_3d = Visualizer3D(self.ui.tab_3d)
+            self.visualizer_3d.animation(df_to_plot, True, timer=self.timer)
+            self.ui.tab_3d.setLayout(self.visualizer_3d.layout_general)
 
     def display_tab_Table(self, uid):
         try:
