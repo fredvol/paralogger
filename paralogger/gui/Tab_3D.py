@@ -119,6 +119,7 @@ def add_plot(mdf, widget):
     # # Set up each plot
     color = (0, 255, 120)
 
+
     # %% Altitude  plot
     start_altitude = mdf["alt"].iloc[0]
     altitude = (mdf["alt"].to_numpy()) - start_altitude  # meters
@@ -131,6 +132,7 @@ def add_plot(mdf, widget):
 
     arrow_alt = pg.ArrowItem(angle=90)
     p1.addItem(arrow_alt)
+    p1.enableAutoRange('y', True)
 
     # %% Pitch  plot
     pitch = mdf["pitch"].to_numpy()
@@ -144,6 +146,8 @@ def add_plot(mdf, widget):
     p2 = widget.addPlot(title="Pitch")
     p2.plot(mdf['time0_s'].to_numpy(), pitch, pen=color, name="pitch [deg]")
     arrow_pitch = pg.ArrowItem(angle=90)
+    # p2.enableAutoScale()
+    # p2.setMenuEnabled()
     p2.addItem(arrow_pitch)
 
     p3 = widget.addPlot(title="roll")
@@ -265,7 +269,9 @@ class Visualizer3D(object):
         self.w.addItem(ax)
 
         self.w.addItem(self.geom)
-        
+
+    # Timer functions:
+    #  
     def on_click_reset(self):
         logger.debug("reset self.index")
         self.index = 0
@@ -286,21 +292,7 @@ class Visualizer3D(object):
         logger.debug("play ")
         self.play = True
 
-    def reset(self):
-        self.df = None
-        self.track = None
-        self.track_is_ploted = False
-        self.index = 0
-        self.step_interval = None
-
-        #empty actual area if exist
-        for i in reversed(range(self.layout_general.count())):
-            widgetToRemove = self.layout_general.itemAt(i).widget()
-            # remove it from the layout list
-            self.layout_general.removeWidget(widgetToRemove)
-            # remove it from the gui
-            widgetToRemove.setParent(None)
-        self.layout_general.addWidget(inside_widget)
+    #####
 
     def extract_path_track(self):
         logger.info("add_path_track ")

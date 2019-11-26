@@ -56,6 +56,15 @@ def config_logger():
 
 logger = config_logger()
 
+def deleteItemsOfLayout(layout):
+     if layout is not None:
+         while layout.count():
+             item = layout.takeAt(0)
+             widget = item.widget()
+             if widget is not None:
+                 widget.setParent(None)
+             else:
+                 deleteItemsOfLayout(item.layout())
 
 class Prog(QtGui.QMainWindow):
     def __init__(self):
@@ -109,7 +118,7 @@ class Prog(QtGui.QMainWindow):
     def debug(self):
         ''' only use for speed up de developement
         '''
-        self.open_pickle_file("mflight_plot_V1.pkl")
+        self.open_pickle_file("Flight_1_think.pkl")
 
     def open_pickle_file(self, filename=None):
         logger.debug(" Menu :  open")
@@ -162,8 +171,6 @@ class Prog(QtGui.QMainWindow):
             self.update_project_tree()
         except Exception as ex:
             logger.warning(ex)
-        
-        
 
 
     def about_popup(self):
@@ -212,7 +219,6 @@ class Prog(QtGui.QMainWindow):
     def get_level_from_index(self, indexes):
 
         if len(indexes) > 0:
-
             level = 0
             index = indexes[0]
             while index.parent().isValid():
@@ -324,14 +330,17 @@ class Prog(QtGui.QMainWindow):
         ####
         #empty actual area if exist
         if len(self.ui.tab_3d.children()) > 0:
-            print("not empty")
+            print("not empty")  #TODO  need doublec cliked for update
+            deleteItemsOfLayout(self.visualizer_3d.layout_general)
+            self.visualizer_3d.layout_general.deleteLater()
+            self.visualizer_3d.layout_general = None
+            
             #self.visualizer_3d.reset()  WIP
             #self.visualizer_3d.animation(df_to_plot, True, timer=self.timer)
 
-        else:
-            self.visualizer_3d = Visualizer3D(self.ui.tab_3d)
-            self.visualizer_3d.animation(df_to_plot, True, timer=self.timer)
-            self.ui.tab_3d.setLayout(self.visualizer_3d.layout_general)
+        self.visualizer_3d = Visualizer3D(self.ui.tab_3d)
+        self.visualizer_3d.animation(df_to_plot, True, timer=self.timer)
+        self.ui.tab_3d.setLayout(self.visualizer_3d.layout_general)
 
     def display_tab_Table(self, uid):
         try:
@@ -365,13 +374,15 @@ class Prog(QtGui.QMainWindow):
         if len(self.ui.tab_graph.children()) > 0:
             print("not empty")
             layout = self.ui.tab_graph.children()[0]
+            deleteItemsOfLayout(layout)
+            # Old code for deleting item
+            # for i in reversed(range(layout.count())):
+            #     widgetToRemove = layout.itemAt(i).widget()
+            #     # remove it from the layout list
+            #     layout.removeWidget(widgetToRemove)
+            #     # remove it from the gui
+            #     widgetToRemove.setParent(None)
 
-            for i in reversed(range(layout.count())):
-                widgetToRemove = layout.itemAt(i).widget()
-                # remove it from the layout list
-                layout.removeWidget(widgetToRemove)
-                # remove it from the gui
-                widgetToRemove.setParent(None)
             layout.addWidget(inside_widget)
 
         else:
