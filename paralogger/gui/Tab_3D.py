@@ -119,7 +119,7 @@ def prepare_data(mdf):
     mdf["lat_m"] = mdf["lat_m"] * 1  #x
     mdf["lon_m"] = mdf["lon_m"] * -1  #y
     mdf["alt_m"] = mdf["alt_m"] * 1  #z
-    mdf["pitch"] = mdf["pitch"] * 1
+    mdf["pitch"] = mdf["pitch"] * -1
     mdf["roll"] = mdf["roll"] * 1
     mdf["yaw"] = mdf["yaw"] * -1
 
