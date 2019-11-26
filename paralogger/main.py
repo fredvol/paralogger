@@ -16,6 +16,7 @@ import pickle
 import platform
 import sys
 import time
+import csv
 from logging.handlers import RotatingFileHandler
 
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
@@ -317,6 +318,9 @@ class Prog(QtGui.QMainWindow):
             action_export_xls = menu.addAction('Export XLSX')
             action_export_xls.triggered.connect(lambda: self.export_df(expformat="xlsx"))
 
+            action_export_xls = menu.addAction('Export device parameters')
+            action_export_xls.triggered.connect(self.export_device_param)
+
         elif level == 1: #Section
             action_export_csv = menu.addAction('Export CSV')
             action_export_csv.triggered.connect(lambda: self.export_df(uid,expformat="csv"))
@@ -349,6 +353,22 @@ class Prog(QtGui.QMainWindow):
         logger.info("add section")
         self.flight.add_general_section()
         self.update_project_tree()
+    
+    def export_device_param(self):
+        """ Export the internal parameters of the PX4 
+        TODO  not avaible if not PX4 filter
+        """
+
+        df_param = self.flight.data[0].device_param
+        tuple_export_file = QtGui.QFileDialog.getSaveFileName(self, 'csv_file', '', '.csv')
+        name_export_file = tuple_export_file[0] + '.csv'
+        with open(name_export_file, 'w', newline="") as csv_file:  
+            writer = csv.writer(csv_file)
+            for key, value in df_param.items():
+                writer.writerow([key, value])
+
+        logger.info("Device parameters exported : " + str(name_export_file))
+
 
     def export_df(self,uid = None, expformat="csv"):
         """Export Dataframe  in different format
