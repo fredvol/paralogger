@@ -477,7 +477,7 @@ class Prog(QtGui.QMainWindow):
         """
         row = signal.row()  # retrieves row of cell that was double clicked
         column = signal.column()  # retrieves column of cell that was double clicked
-        cell_dict = self.ui.model.itemdata(signal)  # returns dict value of signal
+        cell_dict = self.ui.model.itemData(signal)  # returns dict value of signal
         cell_value = cell_dict.get(0)  # retrieve value from dict
 
         uid = self.ui.model.itemData(signal.sibling(0, 1)).get(0)
