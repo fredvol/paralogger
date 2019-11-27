@@ -130,7 +130,7 @@ class Flight:
 
         self.sections = []          # List of Sections object
 
-        self.flight_version = 1     # version of the data model
+        self.flight_version = 2     # version of the data model
 
     @timeit
     def add_data_file(self, mfilePath, mdevice, mposition):
@@ -345,7 +345,7 @@ class Data_File:
         self.position = mposition   # Position of the device during the testflight ( pilot , glider) 
 
         self.df = None              # Dataframe holding the imported and processed data
-        self.version = 1          # version of the Data_File model
+        self.version = 2          # version of the Data_File model
 
         self.file_sha1 = sha256sum(self.file_path) 
 

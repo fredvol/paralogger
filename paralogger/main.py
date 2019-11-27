@@ -7,8 +7,8 @@ Main file , start Point.
 """
 __credits__ = ["Mattleg", "Bruno D", "Fred P"]
 __license__ = "GPL V3"
-__version__ = '0.1.0'
-__pickle_file_version__ = 1  #This will help to detect previous version of pkl file when imported
+__version__ = '0.1.1'
+__pickle_file_version__ = 2  #This will help to detect previous version of pkl file when imported
 
 import logging
 import os
@@ -129,7 +129,7 @@ class Prog(QtGui.QMainWindow):
     def debug(self):
         ''' only use for speed up de developement
         '''
-        self.open_pickle_file("Flight_1_think.pkl")
+        self.open_pickle_file("Flight2_gourdon.pkl")
 
     def open_pickle_file(self, filename=None): 
         """Function to import a file already saved, format is classic python pickle .pkl
@@ -156,7 +156,7 @@ class Prog(QtGui.QMainWindow):
 
                 #Check for version of the opened file 
                 if hasattr(self.flight, 'flight_version'):
-                    if self.flight.flight_version < __pickle_file_version__ :
+                    if int(self.flight.flight_version) < __pickle_file_version__ :
                         logger.info(" !! Importing Old file format: " + str(self.flight.flight_version) + " current is: " + str(__pickle_file_version__))
                 else:
                     logger.info(" !! Importing a file without flight_version info: version can not be checked ")

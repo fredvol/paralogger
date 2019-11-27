@@ -158,7 +158,7 @@ def add_plot(mdf, widget):
     # %% Pitch  plot
     pitch = mdf["pitch"].to_numpy()
     yaw = mdf["yaw"].to_numpy()
-    roll = mdf["roll"].to_numpy()
+   # roll = mdf["roll"].to_numpy()
 
     # pitch= np.rad2deg(pitch)
     # yaw= np.rad2deg(yaw)
@@ -172,16 +172,17 @@ def add_plot(mdf, widget):
     p2.addItem(arrow_pitch)
 
     p3 = widget.addPlot(title="roll")
-    p3.plot(mdf['time0_s'].to_numpy(), roll, pen=color, name="roll [deg]")
-    arrow_roll = pg.ArrowItem(angle=90)
-    p3.addItem(arrow_roll)
+    nbG_tot = mdf["nbG_tot"].to_numpy()
+    p3.plot(mdf['time0_s'].to_numpy(), nbG_tot, pen=color, name="nb_g")
+    arrow_nb_g = pg.ArrowItem(angle=90)
+    p3.addItem(arrow_nb_g)
 
     p4 = widget.addPlot(title="yaw")
     p4.plot(mdf['time0_s'].to_numpy(), yaw, pen=color, name="yaw [deg]")
     arrow_yaw = pg.ArrowItem(angle=90)
     p4.addItem(arrow_yaw)
 
-    return {"arrow_alt": arrow_alt, "arrow_pitch": arrow_pitch, "arrow_roll": arrow_roll, "arrow_yaw": arrow_yaw}
+    return {"arrow_alt": arrow_alt, "arrow_pitch": arrow_pitch, "arrow_nb_g": arrow_nb_g, "arrow_yaw": arrow_yaw}
 
 
 class Visualizer3D(object):
@@ -359,6 +360,7 @@ class Visualizer3D(object):
 
             pitch = self.df["pitch"].iloc[i]
             roll = self.df["roll"].iloc[i]
+            nb_g = self.df["nbG_tot"].iloc[i]
             yaw = self.df["yaw"].iloc[i]
             lat = self.df["lat_m"].iloc[i]
             lon = self.df["lon_m"].iloc[i]
@@ -374,7 +376,7 @@ class Visualizer3D(object):
             #Update arrow:
             self.custom['arrow_alt'].setPos(time0_s, alt)
             self.custom['arrow_pitch'].setPos(time0_s, pitch)
-            self.custom['arrow_roll'].setPos(time0_s, roll)
+            self.custom['arrow_nb_g'].setPos(time0_s, nb_g)
             self.custom['arrow_yaw'].setPos(time0_s, yaw)
 
             #Update 3D body
