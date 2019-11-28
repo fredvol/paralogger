@@ -25,6 +25,7 @@ from PyQt5.QtCore import QSize
 
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget, QTabWidget, QPushButton)
 from pyqtgraph.Qt import QtCore, QtGui
+from pyqtgraph.dockarea import *
 
 try:
     # It raised a exeption but it can pass 
@@ -171,7 +172,7 @@ def add_plot(mdf, widget):
     # p2.setMenuEnabled()
     p2.addItem(arrow_pitch)
 
-    p3 = widget.addPlot(title="roll")
+    p3 = widget.addPlot(title="nb_G")
     nbG_tot = mdf["nbG_tot"].to_numpy()
     p3.plot(mdf['time0_s'].to_numpy(), nbG_tot, pen=color, name="nb_g")
     arrow_nb_g = pg.ArrowItem(angle=90)
@@ -195,21 +196,55 @@ class Visualizer3D(object):
 
         #Main Widget containing everything
 
-        self.mainWidget = QWidget(parent)
+        #self.mainWidget = QWidget(parent)
+
+        ##################################################
+
+
+        self.area = DockArea()
+
+        # Creat the docks
+        self.d1 = Dock("D1 - 3d", size=(100, 150), closable=True)  
+        self.d2 = Dock("D2 - Live Graph",  closable=True)
+        self.d3 = Dock("D3 - Nb_g",  closable=True)
+        self.d4 = Dock("D4 - Yaw",  closable=True)
+        self.d5 = Dock("D5 - values",  closable=True)
+        self.d6 = Dock("D6 - control",  closable=True)
+        
+
+        self.area.addDock(self.d5, 'left')## place d3 at bottom edge of d1
+        self.area.addDock(self.d6, 'bottom', self.d5)## place d3 at bottom edge of d1
+        self.area.addDock(self.d1, 'right',closable=True)      ## place d1 at left edge of dock area (it will fill the whole space since there are no other docks yet)
+
+
+        self.area.addDock(self.d2, 'bottom', self.d1  )   ## place d2 at right edge of dock area
+        
+
+
+        
+        # self.area.addDock(self.d3, 'below', self.d1)## place d3 at bottom edge of d1
+        # self.area.addDock(self.d4, 'below', self.d1)## place d3 at bottom edge of d1
+
+
+        ###########################################
+
+
+
+
         # general layout
-        self.layout_general = QVBoxLayout(self.mainWidget)
+        #self.layout_general = QVBoxLayout(self.mainWidget)
         
 
         #Top Layout
-        self.layout_top = QHBoxLayout()
-        self.layout_general.addLayout(self.layout_top, 70)
+        #self.layout_top = QHBoxLayout()
+        #self.layout_general.addLayout(self.layout_top, 70)
 
         #Bottom Layout
-        self.layout_bottom = QHBoxLayout()
-        self.layout_general.addLayout(self.layout_bottom, 30)
+        #self.layout_bottom = QHBoxLayout()
+        #self.layout_general.addLayout(self.layout_bottom, 30)
 
         #Left top layout
-        self.top_left = QVBoxLayout()
+        #self.top_left = QVBoxLayout()
 
         # add buttons for time control:
         self.button_reset = QPushButton()
@@ -232,30 +267,45 @@ class Visualizer3D(object):
         self.button_play.setText(">")
         self.button_play.clicked.connect(self.on_click_play)
 
+        self.saveBtn = QtGui.QPushButton('Save dock state')
+        self.restoreBtn = QtGui.QPushButton('Restore dock state')
+
+        def save():
+            global state
+            state = self.area.saveState()
+            print(state)
+        def load():
+            global state
+            self.area.restoreState(state)
+        self.saveBtn.clicked.connect(save)
+        self.restoreBtn.clicked.connect(load)
+
         # Live Data text area
         self.data_info_text = QLabel('Live Data info')
-        self.top_left.addWidget(self.data_info_text, 45)  # 20% of the width
+        self.d5.addWidget(self.data_info_text)  # 20% of the width
 
-        self.top_left.addWidget(self.button_stop)  
-        self.top_left.addWidget(self.button_play)  
-        self.top_left.addWidget(self.button_backward)  
-        self.top_left.addWidget(self.button_forward)  
-        self.top_left.addWidget(self.button_reset)  
-        self.layout_top.addLayout(self.top_left, 15)  
+        self.d6.addWidget(self.button_stop)  
+        self.d6.addWidget(self.button_play)  
+        self.d6.addWidget(self.button_backward)  
+        self.d6.addWidget(self.button_forward)  
+        self.d6.addWidget(self.button_reset)  
+        self.d6.addWidget(self.saveBtn)  
+        self.d6.addWidget(self.restoreBtn)  
+       # self.layout_top.addLayout(self.top_left, 15)  
 
         #Anim 3D
         # self.D3_holder = QWidget(parent=self.mainWidget )
         self.w = gl.GLViewWidget(parent=parent)
-        self.layout_top.addWidget(self.w, 85)  # 80% of the width
+        self.d1.addWidget(self.w, 85)  # 80% of the width
 
         # Plot
         self.plots = pg.GraphicsWindow(title="Basic plotting ")
         pg.setConfigOptions(antialias=True)
-        self.layout_bottom.addWidget(self.plots, 20)  # 80% of the width
+        self.d2.addWidget(self.plots, 20)  # 80% of the width
 
         #self.mainWidget.setLayout(self.layout)
 
-        self.timer = QtCore.QTimer(self.mainWidget)
+        self.timer = QtCore.QTimer(self.area)
 
         #self.w = gl.GLViewWidget()
         self.w.opts["distance"] = 160

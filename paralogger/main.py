@@ -422,19 +422,24 @@ class Prog(QtGui.QMainWindow):
 
         df_to_plot = self.flight.apply_section(uid)
         ####
-        #empty actual area if exist
-        if len(self.ui.tab_3d.children()) > 0:
-            print("not empty")  #TODO  need doublec cliked for update
-            deleteItemsOfLayout(self.visualizer_3d.layout_general)
-            self.visualizer_3d.layout_general.deleteLater()
-            self.visualizer_3d.layout_general = None
-            
-            #self.visualizer_3d.reset()  WIP
-            #self.visualizer_3d.animation(df_to_plot, True, timer=self.timer)
 
         self.visualizer_3d = Visualizer3D(self.ui.tab_3d)
         self.visualizer_3d.animation(df_to_plot, True, timer=self.timer)
-        self.ui.tab_3d.setLayout(self.visualizer_3d.layout_general)
+        #empty actual area if exist
+        if len(self.ui.tab_3d.children()) > 0:
+            layout = self.ui.tab_3d.children()[0]
+            deleteItemsOfLayout(layout)
+
+            layout.addWidget(self.visualizer_3d.area)
+
+        else :
+            mainLayout = QtWidgets.QVBoxLayout()
+            mainLayout.addWidget(self.visualizer_3d.area)
+            self.ui.tab_3d.setLayout(mainLayout)
+
+        
+
+        
 
     def display_tab_Table(self, uid):
         """ Display the Pilot dataframe  in a table
@@ -483,7 +488,7 @@ class Prog(QtGui.QMainWindow):
 
         #empty actual area if exist
         if len(self.ui.tab_graph.children()) > 0:
-            print("not empty")
+            print("layout not empty")
             layout = self.ui.tab_graph.children()[0]
             deleteItemsOfLayout(layout)
             # Old code for deleting item
