@@ -265,7 +265,14 @@ class Flight:
         """
         section_to_return = [i for i in self.sections if i.id == uid]
         return section_to_return[0]  
+    
+    def list_section(self):
+        section_list=[]
+        
+        for sect in self.sections:
+            section_list.append([sect.start,sect.end,sect.kind.name])
 
+        return section_list
 
 
 
@@ -407,3 +414,37 @@ class Video_File:
         self.file_sha1 = sha256sum(self.file_path)
 
         self.file_date = time.ctime(os.path.getctime(self.file_path))
+
+class Criteria_book:
+    """Object to store all test criterias
+    
+
+    """
+    def __init__(self):
+        logger.info("Criteria_book ")
+
+        self.version = 1  # version of the Criteria_book model
+        self.date = None
+        self.criteria_list = []
+
+
+
+class Criteria:
+    """Object to store single test criteria 
+    
+
+    """
+    def __repr__(self):
+        return '%s' % (self.device)
+
+    def __init__(self):
+        logger.info("Criteria ")
+
+        self.version = 1  # version of the Criteria model
+        self.plain_name = None
+        self.name = None
+        self.kind_to_apply = [] #iff empty apply to all
+        self.unit = None
+        self.breakpoint = None
+        self.rates = None
+
