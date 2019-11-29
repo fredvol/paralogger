@@ -17,6 +17,8 @@ import platform
 import sys
 import time
 import csv
+from enum import Enum
+
 from logging.handlers import RotatingFileHandler
 
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
@@ -27,7 +29,7 @@ from gui.Tab_Graph import generated_layout
 from gui.Tab_log import QTextEditLogger
 from gui.Tab_Table import pandasTableModel
 from import_log import import_log_diaglog
-from list_param import Position
+from list_param import Position, Device, Kind
 from model import Flight, Sections, getSystemInfo, timeit
 
 os.environ["DISPLAY"] = ":0"  #Use for linux  on vscode at least
@@ -129,7 +131,7 @@ class Prog(QtGui.QMainWindow):
     def debug(self):
         ''' only use for speed up de developement
         '''
-        self.open_pickle_file("Flight2_gourdon.pkl")
+        self.open_pickle_file("combo.pkl")
 
     def open_pickle_file(self, filename=None): 
         """Function to import a file already saved, format is classic python pickle .pkl
@@ -234,14 +236,17 @@ class Prog(QtGui.QMainWindow):
         logger.info("update_project_tree")
         tw = self.ui.treeWidget
         tw.clear()
-        l1 = QtWidgets.QTreeWidgetItem([self.flight.glider, "--", self.flight.id])
+        if self.flight != None:
+            l1 = QtWidgets.QTreeWidgetItem([self.flight.glider, "--", self.flight.id])
 
-        for sect in self.flight.sections:
-            l1_child = QtWidgets.QTreeWidgetItem([str(sect.start) + " - " + str(sect.end), sect.kind, sect.id])
-            l1.addChild(l1_child)
+            for sect in self.flight.sections:
+                l1_child = QtWidgets.QTreeWidgetItem([str(sect.start) + " - " + str(sect.end), sect.kind.value, sect.id])
+                l1.addChild(l1_child)
 
-        tw.addTopLevelItem(l1)
-        tw.expandAll()
+            tw.addTopLevelItem(l1)
+            tw.expandAll()
+        else:
+            logger.info(" Flight  is empty, nothing to display")
 
     def get_level_from_index(self, indexes):
         """Return the level in the treeview
@@ -560,8 +565,15 @@ class Prog(QtGui.QMainWindow):
         for name, value in dict_to_display.items():
             row = []
             cell_name = QtGui.QStandardItem(str(name))
+
+            if isinstance(value, Kind):
+                cell_value = QtGui.QStandardItem(str(value))
+                # TODO  display combobox with a list of option (QItemDelegate?)
+                
+            else:
+                cell_value = QtGui.QStandardItem(str(value))
+
             row.append(cell_name)
-            cell_value = QtGui.QStandardItem(str(value))
             row.append(cell_value)
 
             self.ui.model.appendRow(row)
