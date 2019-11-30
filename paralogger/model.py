@@ -339,7 +339,6 @@ class Data_File:
     
     """
 
-
     def __init__(self, mfilePath, mdevice, mposition):
         logger.info("Data_File ")
 
@@ -415,36 +414,5 @@ class Video_File:
 
         self.file_date = time.ctime(os.path.getctime(self.file_path))
 
-class Criteria_book:
-    """Object to store all test criterias
-    
 
-    """
-    def __init__(self):
-        logger.info("Criteria_book ")
-
-        self.version = 1  # version of the Criteria_book model
-        self.date = None
-        self.criteria_list = []
-
-
-
-class Criteria:
-    """Object to store single test criteria 
-    
-
-    """
-    def __repr__(self):
-        return '%s' % (self.device)
-
-    def __init__(self):
-        logger.info("Criteria ")
-
-        self.version = 1  # version of the Criteria model
-        self.plain_name = None
-        self.name = None
-        self.kind_to_apply = [] #iff empty apply to all
-        self.unit = None
-        self.breakpoint = None
-        self.rates = None
 

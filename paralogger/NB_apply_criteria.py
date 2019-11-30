@@ -8,7 +8,8 @@ This notebook  help to devvelope the ctriteria aplication
 #%% import
 import bisect
 import pickle
-from model import Flight, Sections, Criteria_book, Criteria
+from model import Flight, Sections 
+import json
 
 
 #%% run
@@ -21,26 +22,49 @@ def grade(score, breakpoint=[60,70,80,90], grades='FDCBA'):
 
 # %% Create criteria book
 
-crit_book = Criteria_book()
 
-crit1 = Criteria()
-crit1.name="altitude_lost"
-crit1.plain_name="Altitude lost"
-crit1.unit="m"
-crit1.breakpoint= [20 , 30, 40 , 100]
-crit1.rates="ABCD"
+criteria_dict_book = {}
+criteria_misc = { 1: 
+        {
+        'name' : 'Altitude lost',
+        'unit' : 'm',
+        'function' : 'altitude_lost',
+        'breakpoint' : [20 , 30, 40 , 100],
+        'rates' : ['A' , 'B', 'C' , 'D','F'],
+        } ,
+        2: {
+        'name' : 'Maximun pitch',
+        'unit' : '°',
+        'function' : 'pitch_max',
+        'breakpoint' : [20 , 30, 45 , 50],
+        'rates' : ['A' , 'B', 'C' , 'D'],
+        }  
+    }
 
-crit_book.criteria_list.append(crit1)
+criteria_spiral = { 1:
+        {
+        'name' : 'Altitude lost',
+        'unit' : 'm',
+        'function' : 'altitude_lost',
+        'breakpoint' : [100 , 200, 300 , 400],
+        'rates' : ['A' , 'B', 'C' , 'D','F'],
+        } , 
+        2: {
+        'name' : 'Maximun nb_g',
+        'unit' : '°',
+        'function' : 'max_nbG',
+        'breakpoint' : [2 , 3, 4 , 5],
+        'rates' : ['A' , 'B', 'C' , 'D'],
+        } 
+    }
 
+criteria_dict_book['Misc'] = criteria_misc
+criteria_dict_book['Spiral'] = criteria_spiral
 
-crit2 = Criteria()
-crit2.name="pitch-max"
-crit2.plain_name="Maximun pitch"
-crit2.unit="°"
-crit2.breakpoint= [20 , 30, 45 , 80]
-crit2.rates="ABCD"
+with open('crit_book.json', 'w') as fp:
+    json.dump(criteria_dict_book, fp)
+#json_data = json.dumps(criteria_dict_book)
 
-crit_book.criteria_list.append(crit2)
 
 #%% load flight
 
@@ -53,18 +77,40 @@ with open(pikle_path, 'rb') as pickle_file:
 
 
 # %% function
+class Judge :
 
-def altitude_lost(mdf,breakpoint,rates):
-    alt_lost = df['alt'].min()
-    mgrade = grade(alt_lost, breakpoint,rates) 
-    return {'value' : alt_lost , 'grade':mgrade}
+    def altitude_lost(mdf,breakpoint,rates):
+        val = df['alt'].min()
+        mgrade = grade(val, breakpoint,rates) 
+        return {'value' : val , 'grade':mgrade}
+
+
+    def pitch_max(mdf,breakpoint,rates):
+        val = df['pitch'].max()
+        mgrade = grade(val, breakpoint,rates) 
+        return {'value' : val , 'grade':mgrade}
+
+
+    def max_nbG(mdf,breakpoint,rates):
+        val = df['pitch'].max()
+        mgrade = grade(val, breakpoint,rates) 
+        return {'value' : val , 'grade':mgrade}
 
 #%% process
 for sect in flight.sections:
+
     print("\n section:" , sect)
+
+    #get list of criteria
     df = flight.apply_section(sect.id)
-    result = altitude_lost(df,crit1.breakpoint, crit1.rates)
-    print(result)
+    dict_crit= criteria_dict_book[sect.kind.value]
+    
+
+    for key, details in dict_crit.items():
+        method_to_call = getattr(Judge, details['function'])
+        result = method_to_call(df,details['breakpoint'], details['rates'])
+       # result = altitude_lost(df,details['breakpoint'], details['rates'])
+        print(details['name'],result)
 
 
 # %%
