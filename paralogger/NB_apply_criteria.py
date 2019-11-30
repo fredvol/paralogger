@@ -70,7 +70,7 @@ with open('crit_book.json', 'w') as fp:
 
 flight = None 
 
-pikle_path = "Flight2_gourdon_v3.pkl"
+pikle_path = "Flight2_gourdon_v3_2.pkl"
 
 with open(pikle_path, 'rb') as pickle_file:
     flight = pickle.load(pickle_file)
