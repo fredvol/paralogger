@@ -22,6 +22,11 @@ from enum import Enum
 from logging.handlers import RotatingFileHandler
 
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
+import pyqtgraph.console
+import pyqtgraph as pg
+# import numpy as np
+# import pandas as pd
+
 
 from gui.main_gui import Ui_MainWindow
 from gui.Tab_3D import Visualizer3D
@@ -70,6 +75,7 @@ def deleteItemsOfLayout(layout):
              else:
                  deleteItemsOfLayout(item.layout())
 
+
 class Prog(QtGui.QMainWindow):
     """This is the MAIN program, this is the start point,
      nothing should be calle from doutside of this class.
@@ -113,6 +119,7 @@ class Prog(QtGui.QMainWindow):
         self.ui.actionVersion.triggered.connect(self.about_popup)
         self.ui.actionHelp.triggered.connect(self.openUrl_help)
         self.ui.actiondebug_open.triggered.connect(self.debug)
+        #self.ui.actionopen_console.triggered.connect(self.open_console)
 
         self.ui.treeWidget.itemClicked.connect(self.onTreeItemClicked)
         self.ui.treeWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -125,13 +132,27 @@ class Prog(QtGui.QMainWindow):
         self.ui.model = QtGui.QStandardItemModel(self)  # SELECTING THE MODEL - FRAMEWORK THAT HANDLES QUERIES AND EDITS
         self.ui.tableView.setModel(self.ui.model)  # SETTING THE MODEL
         self.ui.model.dataChanged.connect(self.on_datachange_model)
-    
+
+        #setup iteractive console
+        ## build an initial namespace for console commands to be executed in (this is optional;
+        ## the user can always import these modules manually)
+        namespace = {'prog':self ,"Kind":Kind }
+        ## initial text to display in the console
+        text = " This is an interactive python console \n the following namespace are imported:\n" +  str(list(namespace.keys())) + " \n  Go, play."
+        
+        self.c = pyqtgraph.console.ConsoleWidget(namespace=namespace, text=text)
+        mainLayout_console = QtWidgets.QVBoxLayout()
+        mainLayout_console.addWidget(self.c)
+        self.ui.tab_console.setLayout(mainLayout_console)
+        logger.info(" interactive console ready")
+
+      
 
 
     def debug(self):
         ''' only use for speed up de developement
         '''
-        self.open_pickle_file("combo.pkl")
+        self.open_pickle_file("Flight2_gourdon_v3_2.pkl")
 
     def open_pickle_file(self, filename=None): 
         """Function to import a file already saved, format is classic python pickle .pkl
@@ -562,13 +583,14 @@ class Prog(QtGui.QMainWindow):
         elif level == 1:
             dict_to_display = vars(self.flight.section_by_id(uid))
 
+
         for name, value in dict_to_display.items():
             row = []
             cell_name = QtGui.QStandardItem(str(name))
 
             if isinstance(value, Kind):
                 cell_value = QtGui.QStandardItem(str(value))
-                # TODO  display combobox with a list of option (QItemDelegate?)
+                # TODO  display combobox with a list of option (QItemDelegate? )
                 
             else:
                 cell_value = QtGui.QStandardItem(str(value))
@@ -577,6 +599,7 @@ class Prog(QtGui.QMainWindow):
             row.append(cell_value)
 
             self.ui.model.appendRow(row)
+
 
         # self.show()
 

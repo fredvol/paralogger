@@ -265,7 +265,14 @@ class Flight:
         """
         section_to_return = [i for i in self.sections if i.id == uid]
         return section_to_return[0]  
+    
+    def list_section(self):
+        section_list=[]
+        
+        for sect in self.sections:
+            section_list.append([sect.start,sect.end,sect.kind.name])
 
+        return section_list
 
 
 
@@ -331,7 +338,6 @@ class Data_File:
     """Data file object  hold the detail of the file containing the raw data and the data processed in a dataframe
     
     """
-
 
     def __init__(self, mfilePath, mdevice, mposition):
         logger.info("Data_File ")
@@ -407,3 +413,6 @@ class Video_File:
         self.file_sha1 = sha256sum(self.file_path)
 
         self.file_date = time.ctime(os.path.getctime(self.file_path))
+
+
+
