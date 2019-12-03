@@ -282,7 +282,8 @@ class Visualizer3D(object):
 
         # Live Data text area
         self.data_info_text = QLabel('Live Data info')
-        self.d5.addWidget(self.data_info_text)  # 20% of the width
+        self.data_info_text.setContentsMargins(15, 15, 15, 15)
+        self.d5.addWidget(self.data_info_text)  
 
         self.d6.addWidget(self.button_stop)  
         self.d6.addWidget(self.button_play)  
