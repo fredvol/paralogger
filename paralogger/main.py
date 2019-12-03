@@ -261,7 +261,7 @@ class Prog(QtGui.QMainWindow):
             l1 = QtWidgets.QTreeWidgetItem([self.flight.glider, "--", self.flight.id])
 
             for sect in self.flight.sections:
-                l1_child = QtWidgets.QTreeWidgetItem([str(sect.start) + " - " + str(sect.end), sect.kind.value, sect.id])
+                l1_child = QtWidgets.QTreeWidgetItem([str(sect.start) + " - " + str(sect.end), str(sect.kind.value), sect.id])
                 l1.addChild(l1_child)
 
             tw.addTopLevelItem(l1)
