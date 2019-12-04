@@ -70,11 +70,14 @@ def generated_layout(mdf):
         p1.plot(mdf['time0_s'].to_numpy() , altitude_baro, pen=color2, name="Alt_baro [m]")
         d1.addWidget(p1)
 
-        # Euler angle
-
+        # Euler angle ( /!\ duplicate code with tab_3D.py :: prepare_data)
+        mdf[["pitch", "yaw", "roll"]] = mdf[["pitch", "yaw", "roll"]].apply(np.rad2deg)
         pitch = mdf["pitch"].to_numpy()
         yaw = mdf["yaw"].to_numpy() 
         #roll = mdf["roll"].to_numpy()
+        mdf["pitch"] = mdf["pitch"] * -1
+        mdf["roll"] = mdf["roll"] * 1
+        mdf["yaw"] = mdf["yaw"] * -1
 
         nbG_tot = mdf["nbG_tot"].to_numpy()
 

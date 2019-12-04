@@ -7,7 +7,7 @@ Main file , start Point.
 """
 __credits__ = ["Mattleg", "Bruno D", "Fred P"]
 __license__ = "GPL V3"
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 __pickle_file_version__ = 2  #This will help to detect previous version of pkl file when imported
 
 import logging
@@ -24,8 +24,6 @@ from logging.handlers import RotatingFileHandler
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 import pyqtgraph.console
 import pyqtgraph as pg
-# import numpy as np
-# import pandas as pd
 
 
 from gui.main_gui import Ui_MainWindow
@@ -119,7 +117,6 @@ class Prog(QtGui.QMainWindow):
         self.ui.actionVersion.triggered.connect(self.about_popup)
         self.ui.actionHelp.triggered.connect(self.openUrl_help)
         self.ui.actiondebug_open.triggered.connect(self.debug)
-        #self.ui.actionopen_console.triggered.connect(self.open_console)
 
         self.ui.treeWidget.itemClicked.connect(self.onTreeItemClicked)
         self.ui.treeWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -129,8 +126,8 @@ class Prog(QtGui.QMainWindow):
         self.ui.treeWidget.setHeaderLabels(["Name", "Kind", "Id"])
 
         #setup table view detail section
-        self.ui.model = QtGui.QStandardItemModel(self)  # SELECTING THE MODEL - FRAMEWORK THAT HANDLES QUERIES AND EDITS
-        self.ui.tableView.setModel(self.ui.model)  # SETTING THE MODEL
+        self.ui.model = QtGui.QStandardItemModel(self)  
+        self.ui.tableView.setModel(self.ui.model)
         self.ui.model.dataChanged.connect(self.on_datachange_model)
 
         #setup iteractive console
@@ -462,9 +459,6 @@ class Prog(QtGui.QMainWindow):
             mainLayout = QtWidgets.QVBoxLayout()
             mainLayout.addWidget(self.visualizer_3d.area)
             self.ui.tab_3d.setLayout(mainLayout)
-
-        
-
         
 
     def display_tab_Table(self, uid):
@@ -539,6 +533,8 @@ class Prog(QtGui.QMainWindow):
         
         Arguments:
             signal {QModelIndex} -- Index of the modified cell
+
+        TODO block the edition of enum type ( kind , device , position) or even better implement combobox on GUI
         """
         row = signal.row()  # retrieves row of cell that was double clicked
         column = signal.column()  # retrieves column of cell that was double clicked

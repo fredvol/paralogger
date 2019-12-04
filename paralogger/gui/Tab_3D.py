@@ -95,6 +95,7 @@ def prepare_data(mdf):
     Returns:
         Dataframe -- modified dataframe ( TODO need to check if copy or view?)
     """
+    
     mdf[["pitch", "yaw", "roll"]] = mdf[["pitch", "yaw", "roll"]].apply(np.rad2deg)
 
     # Work on Gps coordinate
@@ -193,12 +194,7 @@ class Visualizer3D(object):
     def __init__(self, parent):
 
 
-
-        #Main Widget containing everything
-
-        #self.mainWidget = QWidget(parent)
-
-        ##################################################
+        #area Widget containing everything
 
 
         self.area = DockArea()
@@ -212,39 +208,11 @@ class Visualizer3D(object):
         self.d6 = Dock("D6 - control",  closable=True)
         
 
-        self.area.addDock(self.d5, 'left')## place d3 at bottom edge of d1
-        self.area.addDock(self.d6, 'bottom', self.d5)## place d3 at bottom edge of d1
-        self.area.addDock(self.d1, 'right',closable=True)      ## place d1 at left edge of dock area (it will fill the whole space since there are no other docks yet)
-
-
-        self.area.addDock(self.d2, 'bottom', self.d1  )   ## place d2 at right edge of dock area
+        self.area.addDock(self.d5, 'left')
+        self.area.addDock(self.d6, 'bottom', self.d5)
+        self.area.addDock(self.d1, 'right',closable=True)     
+        self.area.addDock(self.d2, 'bottom', self.d1  ) 
         
-
-
-        
-        # self.area.addDock(self.d3, 'below', self.d1)## place d3 at bottom edge of d1
-        # self.area.addDock(self.d4, 'below', self.d1)## place d3 at bottom edge of d1
-
-
-        ###########################################
-
-
-
-
-        # general layout
-        #self.layout_general = QVBoxLayout(self.mainWidget)
-        
-
-        #Top Layout
-        #self.layout_top = QHBoxLayout()
-        #self.layout_general.addLayout(self.layout_top, 70)
-
-        #Bottom Layout
-        #self.layout_bottom = QHBoxLayout()
-        #self.layout_general.addLayout(self.layout_bottom, 30)
-
-        #Left top layout
-        #self.top_left = QVBoxLayout()
 
         # add buttons for time control:
         self.button_reset = QPushButton()

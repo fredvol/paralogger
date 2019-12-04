@@ -3,7 +3,11 @@
 PARALOGER ANALYSIS 
 
 NB_aplycriteria 
-This notebook  help to devvelope the ctriteria aplication 
+This notebook  help to develope the ctriteria aplication 
+means giving a letter  to a manoeuvre according to criteria 
+ ex: pitch angle > 45 -> C class
+
+ WIP
 """
 #%% import
 import bisect

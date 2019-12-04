@@ -105,7 +105,7 @@ def getSystemInfo():
 
 
 class Flight:
-    """THis is the main classn representing one Flight
+    """THis is the main class representing one Flight
     
     """
     def __repr__(self):
