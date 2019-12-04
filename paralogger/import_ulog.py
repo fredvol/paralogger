@@ -3,9 +3,11 @@
 PARALOGER ANALYSIS 
 
 File importing PX4 log.
+also workable in Iteractive python
 
 """
 
+# %% import , decorator and function
 import numpy as np
 import pandas as pd
 import os.path
@@ -95,7 +97,7 @@ def load_ulog_file(file_name):
 gravity = 9.80665 #m·s-2
 
 
-#################################################################
+# %% Main Functions    ##############################################
 @timeit
 def ulog_list_data(file_path):
     """ Create a panda dataframe with all the record avaible,
@@ -195,10 +197,19 @@ def ulog_to_df(file_path):
     df_G['pitch'].interpolate(method='linear',inplace=True)
     df_G['roll'].interpolate(method='linear',inplace=True)
     df_G['yaw'].interpolate(method='linear',inplace=True)
+
     df_G['q[0]'].interpolate(method='linear',inplace=True)
     df_G['q[1]'].interpolate(method='linear',inplace=True)
     df_G['q[2]'].interpolate(method='linear',inplace=True)
     df_G['q[3]'].interpolate(method='linear',inplace=True)
+
+    df_G['ax'].interpolate(method='linear',inplace=True)
+    df_G['ay'].interpolate(method='linear',inplace=True)
+    df_G['az'].interpolate(method='linear',inplace=True)
+
+    df_G['baro_alt_meter'].interpolate(method='linear',inplace=True)
+    df_G['az'].interpolate(method='linear',inplace=True)
+    df_G['az'].interpolate(method='linear',inplace=True)
 
     #Find first row with quaternion
     df_G.dropna(subset=['q[0]'], inplace=True)
@@ -227,3 +238,22 @@ def ulog_to_df(file_path):
 
     return df_G
 
+
+
+# %% Main RUN
+if __name__ == "__main__":
+    log_name = "log_23_2019-11-26-12-09-10.ulg"
+
+    cwd = os.path.dirname(os.path.abspath(__file__))
+    logger.info('cwd:' + cwd)
+    ulog_file_path = os.path.join(cwd, "samples", log_name)
+    logger.info('ulog_file_path:' + ulog_file_path)
+
+    df = ulog_to_df(ulog_file_path)
+
+    #Export  the result dataframe  in csv 
+    df.to_csv("full_dataFrame.csv")
+
+    #Making a dataframe containg the name of the parameters
+    df_list_param = ulog_list_data(ulog_file_path)
+    df_list_param.to_csv("list_param.csv")

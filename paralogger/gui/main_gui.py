@@ -8,7 +8,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -29,7 +28,7 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
-        self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.verticalLayout = QtWidgets.QVBoxLayout()
@@ -52,18 +51,21 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addLayout(self.verticalLayout)
         self.main_tabWidget = QtWidgets.QTabWidget(self.centralwidget)
         self.main_tabWidget.setObjectName("main_tabWidget")
-        self.tab_graph = QtWidgets.QWidget(self.centralwidget)
+        self.tab_graph = QtWidgets.QWidget()
         self.tab_graph.setObjectName("tab_graph")
         self.main_tabWidget.addTab(self.tab_graph, "")
-        self.tab_table = QtWidgets.QWidget(self.centralwidget)
+        self.tab_table = QtWidgets.QWidget()
         self.tab_table.setObjectName("tab_table")
         self.main_tabWidget.addTab(self.tab_table, "")
-        self.tab_3d = QtWidgets.QWidget(self.centralwidget)
+        self.tab_3d = QtWidgets.QWidget()
         self.tab_3d.setObjectName("tab_3d")
         self.main_tabWidget.addTab(self.tab_3d, "")
-        self.tab_log = QtWidgets.QWidget(self.centralwidget)
+        self.tab_log = QtWidgets.QWidget()
         self.tab_log.setObjectName("tab_log")
         self.main_tabWidget.addTab(self.tab_log, "")
+        self.tab_console = QtWidgets.QWidget()
+        self.tab_console.setObjectName("tab_console")
+        self.main_tabWidget.addTab(self.tab_console, "")
         self.horizontalLayout.addWidget(self.main_tabWidget)
         self.horizontalLayout.setStretch(0, 1)
         self.horizontalLayout.setStretch(1, 5)
@@ -94,6 +96,8 @@ class Ui_MainWindow(object):
         self.actionSave_as.setObjectName("actionSave_as")
         self.actiondebug_open = QtWidgets.QAction(MainWindow)
         self.actiondebug_open.setObjectName("actiondebug_open")
+        self.actionopen_console = QtWidgets.QAction(MainWindow)
+        self.actionopen_console.setObjectName("actionopen_console")
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSave_as)
         self.menuFile.addSeparator()
@@ -106,7 +110,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menudebug.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.main_tabWidget.setCurrentIndex(2)
+        self.main_tabWidget.setCurrentIndex(4)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -118,6 +122,7 @@ class Ui_MainWindow(object):
         self.main_tabWidget.setTabText(self.main_tabWidget.indexOf(self.tab_table), _translate("MainWindow", "Table"))
         self.main_tabWidget.setTabText(self.main_tabWidget.indexOf(self.tab_3d), _translate("MainWindow", "3D"))
         self.main_tabWidget.setTabText(self.main_tabWidget.indexOf(self.tab_log), _translate("MainWindow", "Log"))
+        self.main_tabWidget.setTabText(self.main_tabWidget.indexOf(self.tab_console), _translate("MainWindow", "Console"))
         self.menuFile.setTitle(_translate("MainWindow", "Fi&le"))
         self.menuAbout.setTitle(_translate("MainWindow", "Abo&ut"))
         self.menudebug.setTitle(_translate("MainWindow", "debug"))
@@ -127,3 +132,5 @@ class Ui_MainWindow(object):
         self.actionVersion.setText(_translate("MainWindow", "&Version"))
         self.actionSave_as.setText(_translate("MainWindow", "&Save_as"))
         self.actiondebug_open.setText(_translate("MainWindow", "debug_open"))
+        self.actionopen_console.setText(_translate("MainWindow", "open_console"))
+

@@ -8,8 +8,8 @@ Main file , start Point.
 """
 __credits__ = ["Mattleg", "Bruno D", "Fred P"]
 __license__ = "GPL V3"
-__version__ = '0.1.0'
-__pickle_file_version__ = 1  #This will help to detect previous version of pkl file when imported
+__version__ = '0.2.0'
+__pickle_file_version__ = 2  #This will help to detect previous version of pkl file when imported
 
 import logging
 import os
@@ -18,9 +18,14 @@ import platform
 import sys
 import time
 import csv
+from enum import Enum
+
 from logging.handlers import RotatingFileHandler
 
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
+import pyqtgraph.console
+import pyqtgraph as pg
+
 
 from gui.main_gui import Ui_MainWindow
 from gui.Tab_3D import Visualizer3D
@@ -28,7 +33,7 @@ from gui.Tab_Graph import generated_layout
 from gui.Tab_log import QTextEditLogger
 from gui.Tab_Table import pandasTableModel
 from import_log import import_log_diaglog
-from list_param import Position
+from list_param import Position, Device, Kind
 from model import Flight, Sections, getSystemInfo, timeit
 
 os.environ["DISPLAY"] = ":0"  #Use for linux  on vscode at least
@@ -68,6 +73,7 @@ def deleteItemsOfLayout(layout):
                  widget.setParent(None)
              else:
                  deleteItemsOfLayout(item.layout())
+
 
 class Prog(QtGui.QMainWindow):
     """This is the MAIN program, this is the start point,
@@ -121,16 +127,30 @@ class Prog(QtGui.QMainWindow):
         self.ui.treeWidget.setHeaderLabels(["Name", "Kind", "Id"])
 
         #setup table view detail section
-        self.ui.model = QtGui.QStandardItemModel(self)  # SELECTING THE MODEL - FRAMEWORK THAT HANDLES QUERIES AND EDITS
-        self.ui.tableView.setModel(self.ui.model)  # SETTING THE MODEL
+        self.ui.model = QtGui.QStandardItemModel(self)  
+        self.ui.tableView.setModel(self.ui.model)
         self.ui.model.dataChanged.connect(self.on_datachange_model)
-    
+
+        #setup iteractive console
+        ## build an initial namespace for console commands to be executed in (this is optional;
+        ## the user can always import these modules manually)
+        namespace = {'prog':self ,"Kind":Kind }
+        ## initial text to display in the console
+        text = " This is an interactive python console \n the following namespace are imported:\n" +  str(list(namespace.keys())) + " \n  Go, play."
+        
+        self.c = pyqtgraph.console.ConsoleWidget(namespace=namespace, text=text)
+        mainLayout_console = QtWidgets.QVBoxLayout()
+        mainLayout_console.addWidget(self.c)
+        self.ui.tab_console.setLayout(mainLayout_console)
+        logger.info(" interactive console ready")
+
+      
 
 
     def debug(self):
         ''' only use for speed up de developement
         '''
-        self.open_pickle_file("Flight_1_think.pkl")
+        self.open_pickle_file("Flight2_gourdon_v3_2.pkl")
 
     def open_pickle_file(self, filename=None): 
         """Function to import a file already saved, format is classic python pickle .pkl
@@ -157,7 +177,7 @@ class Prog(QtGui.QMainWindow):
 
                 #Check for version of the opened file 
                 if hasattr(self.flight, 'flight_version'):
-                    if self.flight.flight_version < __pickle_file_version__ :
+                    if int(self.flight.flight_version) < __pickle_file_version__ :
                         logger.info(" !! Importing Old file format: " + str(self.flight.flight_version) + " current is: " + str(__pickle_file_version__))
                 else:
                     logger.info(" !! Importing a file without flight_version info: version can not be checked ")
@@ -235,14 +255,17 @@ class Prog(QtGui.QMainWindow):
         logger.info("update_project_tree")
         tw = self.ui.treeWidget
         tw.clear()
-        l1 = QtWidgets.QTreeWidgetItem([self.flight.glider, "--", self.flight.id])
+        if self.flight != None:
+            l1 = QtWidgets.QTreeWidgetItem([self.flight.glider, "--", self.flight.id])
 
-        for sect in self.flight.sections:
-            l1_child = QtWidgets.QTreeWidgetItem([str(sect.start) + " - " + str(sect.end), sect.kind, sect.id])
-            l1.addChild(l1_child)
+            for sect in self.flight.sections:
+                l1_child = QtWidgets.QTreeWidgetItem([str(sect.start) + " - " + str(sect.end), str(sect.kind.value), sect.id])
+                l1.addChild(l1_child)
 
-        tw.addTopLevelItem(l1)
-        tw.expandAll()
+            tw.addTopLevelItem(l1)
+            tw.expandAll()
+        else:
+            logger.info(" Flight  is empty, nothing to display")
 
     def get_level_from_index(self, indexes):
         """Return the level in the treeview
@@ -423,19 +446,21 @@ class Prog(QtGui.QMainWindow):
 
         df_to_plot = self.flight.apply_section(uid)
         ####
-        #empty actual area if exist
-        if len(self.ui.tab_3d.children()) > 0:
-            print("not empty")  #TODO  need doublec cliked for update
-            deleteItemsOfLayout(self.visualizer_3d.layout_general)
-            self.visualizer_3d.layout_general.deleteLater()
-            self.visualizer_3d.layout_general = None
-            
-            #self.visualizer_3d.reset()  WIP
-            #self.visualizer_3d.animation(df_to_plot, True, timer=self.timer)
 
         self.visualizer_3d = Visualizer3D(self.ui.tab_3d)
         self.visualizer_3d.animation(df_to_plot, True, timer=self.timer)
-        self.ui.tab_3d.setLayout(self.visualizer_3d.layout_general)
+        #empty actual area if exist
+        if len(self.ui.tab_3d.children()) > 0:
+            layout = self.ui.tab_3d.children()[0]
+            deleteItemsOfLayout(layout)
+
+            layout.addWidget(self.visualizer_3d.area)
+
+        else :
+            mainLayout = QtWidgets.QVBoxLayout()
+            mainLayout.addWidget(self.visualizer_3d.area)
+            self.ui.tab_3d.setLayout(mainLayout)
+        
 
     def display_tab_Table(self, uid):
         """ Display the Pilot dataframe  in a table
@@ -484,7 +509,7 @@ class Prog(QtGui.QMainWindow):
 
         #empty actual area if exist
         if len(self.ui.tab_graph.children()) > 0:
-            print("not empty")
+            print("layout not empty")
             layout = self.ui.tab_graph.children()[0]
             deleteItemsOfLayout(layout)
             # Old code for deleting item
@@ -509,6 +534,8 @@ class Prog(QtGui.QMainWindow):
         
         Arguments:
             signal {QModelIndex} -- Index of the modified cell
+
+        TODO block the edition of enum type ( kind , device , position) or even better implement combobox on GUI
         """
         row = signal.row()  # retrieves row of cell that was double clicked
         column = signal.column()  # retrieves column of cell that was double clicked
@@ -553,14 +580,23 @@ class Prog(QtGui.QMainWindow):
         elif level == 1:
             dict_to_display = vars(self.flight.section_by_id(uid))
 
+
         for name, value in dict_to_display.items():
             row = []
             cell_name = QtGui.QStandardItem(str(name))
+
+            if isinstance(value, Kind):
+                cell_value = QtGui.QStandardItem(str(value))
+                # TODO  display combobox with a list of option (QItemDelegate? )
+                
+            else:
+                cell_value = QtGui.QStandardItem(str(value))
+
             row.append(cell_name)
-            cell_value = QtGui.QStandardItem(str(value))
             row.append(cell_value)
 
             self.ui.model.appendRow(row)
+
 
         # self.show()
 

@@ -38,7 +38,7 @@ def generated_layout(mdf):
         # Creat the docks
         d1 = Dock("Dock1 - altitude", size=(100, 150), closable=True)  
         d2 = Dock("Dock3 - Pitch",  closable=True)
-        d3 = Dock("Dock4 - Roll",  closable=True)
+        d3 = Dock("Dock4 - Nb_g",  closable=True)
         d4 = Dock("Dock5 - Yaw",  closable=True)
         
 
@@ -54,28 +54,40 @@ def generated_layout(mdf):
 
         # # Set up each plot 
         color = (0,255,120)
+        color2 = (100,155,120)
 
         # %% Altitude  plot
+        # considering the start of the  section dataframe as the 0
         p1 = pg.PlotWidget(title="Altitude")
+        p1.addLegend()
         start_altitude =mdf["alt"].iloc[0] 
-        altitude = (mdf["alt"].to_numpy() )   -  start_altitude # meters
+        start_altitude_baro =mdf["baro_alt_meter"].iloc[0] 
 
-        p1.plot(mdf['time0_s'].to_numpy() , altitude, pen=color, name="Alt [m]")
+        altitude = (mdf["alt"].to_numpy() )   -  start_altitude # meters
+        altitude_baro = (mdf["baro_alt_meter"].to_numpy() )   -  start_altitude_baro # meters
+
+        p1.plot(mdf['time0_s'].to_numpy() , altitude, pen=color, name="Alt_gps [m]")
+        p1.plot(mdf['time0_s'].to_numpy() , altitude_baro, pen=color2, name="Alt_baro [m]")
         d1.addWidget(p1)
 
-        # Euler angle
-
+        # Euler angle ( /!\ duplicate code with tab_3D.py :: prepare_data)
+        mdf[["pitch", "yaw", "roll"]] = mdf[["pitch", "yaw", "roll"]].apply(np.rad2deg)
         pitch = mdf["pitch"].to_numpy()
         yaw = mdf["yaw"].to_numpy() 
-        roll = mdf["roll"].to_numpy()
+        #roll = mdf["roll"].to_numpy()
+        mdf["pitch"] = mdf["pitch"] * -1
+        mdf["roll"] = mdf["roll"] * 1
+        mdf["yaw"] = mdf["yaw"] * -1
+
+        nbG_tot = mdf["nbG_tot"].to_numpy()
 
 
         p2 = pg.PlotWidget(title="Pitch")
         p2.plot(mdf['time0_s'].to_numpy() , pitch, pen=color, name="pitch [deg]")
         d2.addWidget(p2)
 
-        p3 = pg.PlotWidget(title="Roll")
-        p3.plot(mdf['time0_s'].to_numpy() , roll, pen=color, name="roll [deg]")
+        p3 = pg.PlotWidget(title="G force")
+        p3.plot(mdf['time0_s'].to_numpy() , nbG_tot, pen=color, name="roll [deg]")
         d3.addWidget(p3)
 
         p4 = pg.PlotWidget(title="Yaw")
