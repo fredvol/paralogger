@@ -1,7 +1,7 @@
 # paralogger
 This is the main code part of the project.
 
-[[doc_for_readme/3D.png|3D_view]]
+![3D_view](/doc_for_readme/3D.png?raw=true "3D_view")
 
 ## Goals:
 * Create a software suite to use the datalogger in the air including:
@@ -47,7 +47,7 @@ We use: git , with LFS : <a href="https://github.com/git-lfs/git-lfs/wiki/Instal
 
 ## Overview of the code organisation:
 
-  [![soft mindmap](doc_for_readme/Paralogger.svg)](https://framindmap.org/c/maps/848541/public "softaware mind map ( V 0.2.0")
+  [![soft mindmap](/doc_for_readme/Paralogger.svg)](https://framindmap.org/c/maps/848541/public "softaware mind map ( V 0.2.0")
 
 
 
