@@ -6,6 +6,11 @@ Misc stuff about paraglider logger
 * Testing and judging the reliabilyty of the dataloggers , and assess theirs adavantges and their limits.
 * Collect datas in view to propose criteria for the norm.
 
+## Actual state (Dec 2019):
+* the validation indoors looks good.
+* A first gui software is on devellopement:
+* Still work to do on the device ( batterie, keyboard, case)
+
 ## Project road:
 1. **Hardware selection**
 
@@ -58,47 +63,13 @@ Here a list of possible pertinent output, that should be tested for their revela
         * angle acceleration [°/s2]
         * angle jerk [°/s3]
 
-**5. final specs**
 
-
-
-
-## Creating environment:
-Working on :
-* Linux Mint : 18.3 - 19.1
-* python : 3.7
-* anaconda : 4.7.11
-
-**Setting up the python env**
-```bash
-conda create --name paralogger
-
-conda install -n paralogger pip
-conda install --name paralogger pylint
-
-conda cativate paralogger
-
-conda install -c conda-forge pyulog
-conda install pandas
-conda install -c bokeh bokeh
-conda install -c anaconda scipy
-conda install -c conda-forge matplotlib 
-```
-
-Misc ( to run PX4 preview):
-```bash
-conda install -c conda-forge pyfftw
-conda install -c conda-forge simplekml
-conda install -c mikesilva smopy
-```
-
-To check:
-
-```bash
-conda list -n paralogger
-```
 ## Organisation of the code
-So far just a bunch of scripts.
+*Validation* : the first trial use to validate indoor the device
+*Tools* : standalone scripts use at some point of the devellopement.
+*Mechanic* : stuff around the machanical part 
+*parlogger* : the main code  of teh software ( including a readme with more specific infos)
+
 
 
 ## Sharing

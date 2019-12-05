@@ -150,7 +150,7 @@ class Prog(QtGui.QMainWindow):
     def debug(self):
         ''' only use for speed up de developement
         '''
-        self.open_pickle_file("Flight2_gourdon_v3_2.pkl")
+        self.open_pickle_file("Flight2_gourdon_v0-2-0.pkl")
 
     def open_pickle_file(self, filename=None): 
         """Function to import a file already saved, format is classic python pickle .pkl
