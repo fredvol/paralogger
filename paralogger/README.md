@@ -1,7 +1,14 @@
 # paralogger
 This is the main code part of the project.
 
+
+
 ![3D_view](/doc_for_readme/3D.png?raw=true "3D_view")
+
+Preview video:
+ [![paralogger V0.2](/doc_for_readme/video_preview.png)](https://vimeo.com/377398166 "preview video V 0.2.0")
+
+
 
 ## Goals:
 * Create a software suite to use the datalogger in the air including:
@@ -17,6 +24,8 @@ This is the main code part of the project.
 * Mutiplatform
 * able to work headless, on batch of log files
 * working as postprocessing, not in live processing
+* Not device specific ( maight need to accept of device log or video)
+* open source 
 
 
 ## Environement
@@ -49,9 +58,10 @@ We use: git , with LFS : <a href="https://github.com/git-lfs/git-lfs/wiki/Instal
 
   [![soft mindmap](/doc_for_readme/Paralogger.svg)](https://framindmap.org/c/maps/848541/public "softaware mind map ( V 0.2.0")
 
-
-
+    All start  from main.py
+    Some jupyter notebook are use for teh devellopement ( interactive python using #%%).
+    
 ## LICENSE
-GPL V3
+ GPL V3
 
-WIP
+...WIP ...
