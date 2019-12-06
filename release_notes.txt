@@ -1,0 +1,10 @@
+V0.2.0 (4/12/2019)
+* 3D tab using dock area
+* add interactive console
+* add enume type for list_param
+* save file version : 2 
+
+
+V0.1.0 (26/11/2019)
+* inital release
+
