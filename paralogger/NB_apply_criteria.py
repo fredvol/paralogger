@@ -14,11 +14,38 @@ means giving a letter  to a manoeuvre according to criteria
 
 #%% import
 import bisect
-import pickle
-from model import Flight, Sections 
 import json
+import logging
+import pickle
+
+import jsonpickle
 import numpy as np
 
+from judge import Judge
+from model import Flight, Sections
+
+log_file_name ="NB_apply_crit.log"
+def config_logger():
+    """Logger configuration.
+    log in a file + send to debug console + send to log tab in the app
+    """
+    logger = logging.getLogger()
+    # logging.basicConfig(filename='1_import.log',level=logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s :: %(levelname)s :: %(module)s :: %(funcName)s ::  %(message)s")
+    file_handler = logging.handlers.RotatingFileHandler(log_file_name, "a", 1000000, 1)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    # Redirect log on console
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.DEBUG)
+    logger.addHandler(stream_handler)
+    return logger
+
+
+logger = config_logger()
 
 #%% run
 def grade(score, mbreakpoint=[60,70,80,90], grades='FDCBA'):
@@ -87,42 +114,62 @@ with open(pikle_path, 'rb') as pickle_file:
     flight = pickle.load(pickle_file)
 
 
-# %% function
-class Judge :
+# # %% function
+# class Judge :
 
-    def altitude_lost(mdf,mbreakpoint,mrates):
-        start_altitude = mdf["alt"].iloc[0]
-        val = mdf['alt'].min() - start_altitude
-        mgrade = grade(val, mbreakpoint,mrates) 
-        return {'value' : val , 'grade':mgrade}
-
-
-    def pitch_max(mdf,mbreakpoint,mrates):
-        val = np.rad2deg(abs(df['pitch'].max()))
-        mgrade = grade(val, mbreakpoint,mrates) 
-        return {'value' : val , 'grade':mgrade}
+#     def altitude_lost(mdf,mbreakpoint,mrates):
+#         start_altitude = mdf["alt"].iloc[0]
+#         val = mdf['alt'].min() - start_altitude
+#         mgrade = grade(val, mbreakpoint,mrates) 
+#         return {'value' : val , 'grade':mgrade}
 
 
-    def max_nbG(mdf,mbreakpoint,mrates):
-        val = abs(df['nbG_tot'].max())
-        mgrade = grade(val, mbreakpoint,mrates) 
-        return {'value' : val , 'grade':mgrade}
+#     def pitch_max(mdf,mbreakpoint,mrates):
+#         val = np.rad2deg(abs(df['pitch'].max()))
+#         mgrade = grade(val, mbreakpoint,mrates) 
+#         return {'value' : val , 'grade':mgrade}
 
-#%% process
-for sect in flight.sections:
 
-    print("\n section:" , sect)
+#     def max_nbG(mdf,mbreakpoint,mrates):
+#         val = abs(df['nbG_tot'].max())
+#         mgrade = grade(val, mbreakpoint,mrates) 
+#         return {'value' : val , 'grade':mgrade}
 
-    #get list of criteria
-    df = flight.apply_section(sect.id)
-    dict_crit= criteria_dict_book[sect.kind.value]
+# #%% process
+# for sect in flight.sections:
+
+#     print("\n section:" , sect)
+
+#     #get list of criteria
+#     df = flight.apply_section(sect.id)
+#     dict_crit= criteria_dict_book[sect.kind.value]
     
 
-    for key, details in dict_crit.items():
-        method_to_call = getattr(Judge, details['function'])
-        result = method_to_call(df,details['breakpoint'], details['rates'])
-       # result = altitude_lost(df,details['breakpoint'], details['rates'])
-        print(details['name'],result)
+#     for key, details in dict_crit.items():
+#         method_to_call = getattr(Judge, details['function'])
+#         result = method_to_call(df,details['breakpoint'], details['rates'])
+#        # result = altitude_lost(df,details['breakpoint'], details['rates'])
+#         print(details['name'],result)
+
+
+# %% using class 
+
+
+path_file = "crit_book.json"
+
+jdg = Judge()
+
+jdg.dict_criteria = criteria_dict_book
+
+jdg.save_judge("judge1.json")
+
+# %%
+jdg2=Judge()
+
+print(jdg2)
+jdg2.load_judge('judge1.json')
+
+print(jdg2)
 
 
 # %%
