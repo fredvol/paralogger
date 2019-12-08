@@ -31,7 +31,7 @@ class Judge:
 
         self.version = 1  # version of the Judge file model
         self.file_path = mfilePath
-        self.file_sha1 = None
+        self.dict_sha1 = None
         self.date = None
         self.dict_criteria = None
 
@@ -78,14 +78,14 @@ class Judge:
         with open(mpath, 'w') as fp:
             fp.write(judge_freeze)
 
-    def grade(score, mbreakpoint, mgrades=None):
+    def grade(self,score, mbreakpoint, mgrades=None):
         if mgrades == None or mbreakpoint == None:
             return None
         i = bisect.bisect_left(mbreakpoint,score)
         return mgrades[i]
 
   
-    def run(df, sect_type) :
+    def run(self,df, sect_type) :
         result_section = {}
         dict_crit=self.dict_criteria[sect_type]
 
@@ -100,19 +100,19 @@ class Judge:
   
   #### Extract numeric data ######
     
-    def altitude_lost(mdf,mbreakpoint,mrates):
+    def altitude_lost(self,mdf,mbreakpoint,mrates):
         start_altitude = mdf["alt"].iloc[0]
         val = mdf['alt'].min() - start_altitude
-        mgrade = grade(val, mbreakpoint,mrates) 
+        mgrade = self.grade(val, mbreakpoint,mrates) 
         return {'value' : val , 'grade':mgrade}
 
-    def pitch_max(mdf,mbreakpoint,mrates):
-        val = np.rad2deg(abs(df['pitch'].max()))
-        mgrade = grade(val, mbreakpoint,mrates) 
+    def pitch_max(self,mdf,mbreakpoint,mrates):
+        val = np.rad2deg(abs(mdf['pitch'].max()))
+        mgrade = self.grade(val, mbreakpoint,mrates) 
         return {'value' : val , 'grade':mgrade}
 
-    def max_nbG(mdf,mbreakpoint,mrates):
-        val = abs(df['nbG_tot'].max())
-        mgrade = grade(val, mbreakpoint,mrates) 
+    def max_nbG(self,mdf,mbreakpoint,mrates):
+        val = abs(mdf['nbG_tot'].max())
+        mgrade = self.grade(val, mbreakpoint,mrates) 
         return {'value' : val , 'grade':mgrade}
 
