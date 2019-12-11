@@ -22,8 +22,9 @@ import numpy as np
 import pandas as pd
 import pip
 
-from import_ulog import ulog_list_data, ulog_param, ulog_to_df
+from import_ulog import ulog_list_data, ulog_param, ulog_to_df ,add_rk_angle
 from list_param import Device, Kind, Position
+
 
 logger = logging.getLogger("model")
 
@@ -413,6 +414,11 @@ class Data_File:
         )
 
         return {"timestamp_start": timestamp_start, "timestamp_end": timestamp_end}
+
+    def add_quaternion_work(self):
+        logger.debug("add_quaternion_work")
+        add_rk_angle(self.df)
+
 
 class Video_File:
     """Object to store video file info, WIP
