@@ -10,6 +10,7 @@ import pandas as pd  # pour manipuler des tableau de manière efficace
 
 # funtions 
 
+
 def add_rot_mat_cols_r_BGeo_rk_angle( file_to_import = "data.csv"):
 # This fucntion add 13 columns to the PIX4 data log
 
@@ -114,5 +115,5 @@ def add_rot_mat_cols_r_BGeo_rk_angle( file_to_import = "data.csv"):
 # yaw = np.arctan2(2.0 * (q[0] * q[3] + q[1] * q[2]),
 #                     1.0 - 2.0 * (q[2] * q[2] + q[3] * q[3])) 
 
-add_rot_mat_cols_r_BGeo_rk_angle( "data_short_version.csv" )
+#add_rot_mat_cols_r_BGeo_rk_angle( "data_short_version.csv" )
 # 
