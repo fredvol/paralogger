@@ -155,21 +155,33 @@ with open(pikle_path, 'rb') as pickle_file:
 # %% using class 
 
 
-path_file = "crit_book.json"
+path_file = "judge1.json"
 
-jdg = Judge()
+jdg = Judge(path_file)
 
-jdg.dict_criteria = criteria_dict_book
+# jdg.dict_criteria = criteria_dict_book
 
-jdg.save_judge("judge1.json")
+# jdg.save_judge("judge1.json")
+
+
 
 # %%
-jdg2=Judge()
+# jdg2=Judge()
 
-print(jdg2)
-jdg2.load_judge('judge1.json')
+# print(jdg2)
+# jdg2.load_judge('judge1.json')
 
-print(jdg2)
+# print(jdg2)
 
+
+#%% process
+for sect in flight.sections:
+
+    print("\n section:" , sect)
+
+    #get list of criteria
+    df = flight.apply_section(sect.id)
+    rst_section = jdg.run(df,sect.kind.value)
+    print(rst_section)
 
 # %%
