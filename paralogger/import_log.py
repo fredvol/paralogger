@@ -27,9 +27,12 @@ from PyQt5.QtGui import QFileDialog , QGuiApplication
 from PyQt5.QtCore import QRect 
 
 def populate_combo_box( combo , class_param):
-    list_param = [i for i in dir(class_param) if not "__" in i]
-    for val in list_param:
-        combo.addItem(getattr(class_param, val))
+    for p in class_param:
+        combo.addItem(p.name,p)
+
+    # list_param = [i for i in dir(class_param) if not "__" in i]
+    # for val in list_param:
+    #     combo.addItem(getattr(class_param, val))
 
 
 
@@ -50,7 +53,8 @@ class import_log_diaglog(QDialog):
 
         populate_combo_box(self.ui.deviceComboBox_video_device, VideoDevice)
 
-        self.ui.positionComboBox.setCurrentIndex(1) # to have pilot as default position
+        self.ui.positionComboBox.setCurrentIndex(self.ui.positionComboBox.findText(Position.PILOT.name)) # to have pilot as default position
+        self.ui.deviceComboBox.setCurrentIndex(self.ui.deviceComboBox.findText(Device.PIXRACER.name)) # to have pixracer as default position
 
 
         #set up button
@@ -108,8 +112,8 @@ class import_log_diaglog(QDialog):
         self.imported_Flight = Flight()
         
         ulog_file_path = self.ui.label_file_log_1.text()
-        ulog_device = text = str(self.ui.deviceComboBox.currentText())
-        ulog_position = text = str(self.ui.positionComboBox.currentText())
+        ulog_device  = self.ui.deviceComboBox.currentData()
+        ulog_position  = self.ui.positionComboBox.currentData()
 
         glider_name = self.ui.gliderModelLineEdit.text()
         manufacturer_name = self.ui.manufacturerLineEdit.text()

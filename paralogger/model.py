@@ -105,7 +105,7 @@ def getSystemInfo():
 
 
 class Flight:
-    """THis is the main classn representing one Flight
+    """THis is the main class representing one Flight
     
     """
     def __repr__(self):
@@ -130,7 +130,7 @@ class Flight:
 
         self.sections = []          # List of Sections object
 
-        self.flight_version = 1     # version of the data model
+        self.flight_version = 2     # version of the data model
 
     @timeit
     def add_data_file(self, mfilePath, mdevice, mposition):
@@ -224,7 +224,7 @@ class Flight:
         return df_plot_sel
 
 
-    def add_general_section(self , time_min=None ,time_max=None ):
+    def add_general_section(self , time_min=None ,time_max=None, mkind =Kind.MISC):
         """Add a Section objet to the Flight object
         Using realative time of the dataframe : time0
         
@@ -245,7 +245,7 @@ class Flight:
             if time_max == None:
                 time_max = df['time0_s'].max()
 
-            mSection= Sections(time_min,time_max,Kind.MISC)
+            mSection= Sections(time_min,time_max,mkind)
             self.sections.append(mSection)
             
         else:
@@ -265,6 +265,34 @@ class Flight:
         """
         section_to_return = [i for i in self.sections if i.id == uid]
         return section_to_return[0]  
+    
+    def list_section(self):
+        """Export the list of section  to list
+        
+        Returns:
+            list -- list of flight sections
+        """
+        section_list=[]
+        
+        for sect in self.sections:
+            section_list.append([sect.start,sect.end,sect.kind.name])
+
+        return section_list
+
+    def import_list_section(self,lst_section):
+        """Import section list
+        import list look like that: [['180', 539.1488, 'MISC'], ['250', '306', 'MISC']]
+        
+        Arguments:
+            lst_section {list} -- list of sections to import
+        """
+        if len(lst_section) > 0:
+
+            for sect in lst_section:
+                mSection = Sections(sect[0],sect[1],getattr(Kind, sect[3], Kind.MISC) )
+                self.sections.append(mSection)
+        else:
+            logger.info("list of section to import is empty")
 
 
 
@@ -332,7 +360,6 @@ class Data_File:
     
     """
 
-
     def __init__(self, mfilePath, mdevice, mposition):
         logger.info("Data_File ")
 
@@ -345,7 +372,7 @@ class Data_File:
         self.position = mposition   # Position of the device during the testflight ( pilot , glider) 
 
         self.df = None              # Dataframe holding the imported and processed data
-        self.version = 1          # version of the Data_File model
+        self.version = 2          # version of the Data_File model
 
         self.file_sha1 = sha256sum(self.file_path) 
 
@@ -407,3 +434,6 @@ class Video_File:
         self.file_sha1 = sha256sum(self.file_path)
 
         self.file_date = time.ctime(os.path.getctime(self.file_path))
+
+
+

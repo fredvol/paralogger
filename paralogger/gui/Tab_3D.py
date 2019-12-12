@@ -25,6 +25,7 @@ from PyQt5.QtCore import QSize
 
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget, QTabWidget, QPushButton)
 from pyqtgraph.Qt import QtCore, QtGui
+from pyqtgraph.dockarea import *
 
 try:
     # It raised a exeption but it can pass 
@@ -94,6 +95,7 @@ def prepare_data(mdf):
     Returns:
         Dataframe -- modified dataframe ( TODO need to check if copy or view?)
     """
+    
     mdf[["pitch", "yaw", "roll"]] = mdf[["pitch", "yaw", "roll"]].apply(np.rad2deg)
 
     # Work on Gps coordinate
@@ -158,7 +160,7 @@ def add_plot(mdf, widget):
     # %% Pitch  plot
     pitch = mdf["pitch"].to_numpy()
     yaw = mdf["yaw"].to_numpy()
-    roll = mdf["roll"].to_numpy()
+   # roll = mdf["roll"].to_numpy()
 
     # pitch= np.rad2deg(pitch)
     # yaw= np.rad2deg(yaw)
@@ -171,17 +173,18 @@ def add_plot(mdf, widget):
     # p2.setMenuEnabled()
     p2.addItem(arrow_pitch)
 
-    p3 = widget.addPlot(title="roll")
-    p3.plot(mdf['time0_s'].to_numpy(), roll, pen=color, name="roll [deg]")
-    arrow_roll = pg.ArrowItem(angle=90)
-    p3.addItem(arrow_roll)
+    p3 = widget.addPlot(title="nb_G")
+    nbG_tot = mdf["nbG_tot"].to_numpy()
+    p3.plot(mdf['time0_s'].to_numpy(), nbG_tot, pen=color, name="nb_g")
+    arrow_nb_g = pg.ArrowItem(angle=90)
+    p3.addItem(arrow_nb_g)
 
     p4 = widget.addPlot(title="yaw")
     p4.plot(mdf['time0_s'].to_numpy(), yaw, pen=color, name="yaw [deg]")
     arrow_yaw = pg.ArrowItem(angle=90)
     p4.addItem(arrow_yaw)
 
-    return {"arrow_alt": arrow_alt, "arrow_pitch": arrow_pitch, "arrow_roll": arrow_roll, "arrow_yaw": arrow_yaw}
+    return {"arrow_alt": arrow_alt, "arrow_pitch": arrow_pitch, "arrow_nb_g": arrow_nb_g, "arrow_yaw": arrow_yaw}
 
 
 class Visualizer3D(object):
@@ -191,24 +194,25 @@ class Visualizer3D(object):
     def __init__(self, parent):
 
 
+        #area Widget containing everything
 
-        #Main Widget containing everything
 
-        self.mainWidget = QWidget(parent)
-        # general layout
-        self.layout_general = QVBoxLayout(self.mainWidget)
+        self.area = DockArea()
+
+        # Creat the docks
+        self.d1 = Dock("D1 - 3d", size=(100, 150), closable=True)  
+        self.d2 = Dock("D2 - Live Graph",  closable=True)
+        self.d3 = Dock("D3 - Nb_g",  closable=True)
+        self.d4 = Dock("D4 - Yaw",  closable=True)
+        self.d5 = Dock("D5 - values",  closable=True)
+        self.d6 = Dock("D6 - control",  closable=True)
         
 
-        #Top Layout
-        self.layout_top = QHBoxLayout()
-        self.layout_general.addLayout(self.layout_top, 70)
-
-        #Bottom Layout
-        self.layout_bottom = QHBoxLayout()
-        self.layout_general.addLayout(self.layout_bottom, 30)
-
-        #Left top layout
-        self.top_left = QVBoxLayout()
+        self.area.addDock(self.d5, 'left')
+        self.area.addDock(self.d6, 'bottom', self.d5)
+        self.area.addDock(self.d1, 'right',closable=True)     
+        self.area.addDock(self.d2, 'bottom', self.d1  ) 
+        
 
         # add buttons for time control:
         self.button_reset = QPushButton()
@@ -231,30 +235,46 @@ class Visualizer3D(object):
         self.button_play.setText(">")
         self.button_play.clicked.connect(self.on_click_play)
 
+        self.saveBtn = QtGui.QPushButton('Save dock state')
+        self.restoreBtn = QtGui.QPushButton('Restore dock state')
+
+        def save():
+            global state
+            state = self.area.saveState()
+            print(state)
+        def load():
+            global state
+            self.area.restoreState(state)
+        self.saveBtn.clicked.connect(save)
+        self.restoreBtn.clicked.connect(load)
+
         # Live Data text area
         self.data_info_text = QLabel('Live Data info')
-        self.top_left.addWidget(self.data_info_text, 45)  # 20% of the width
+        self.data_info_text.setContentsMargins(15, 15, 15, 15)
+        self.d5.addWidget(self.data_info_text)  
 
-        self.top_left.addWidget(self.button_stop)  
-        self.top_left.addWidget(self.button_play)  
-        self.top_left.addWidget(self.button_backward)  
-        self.top_left.addWidget(self.button_forward)  
-        self.top_left.addWidget(self.button_reset)  
-        self.layout_top.addLayout(self.top_left, 15)  
+        self.d6.addWidget(self.button_stop)  
+        self.d6.addWidget(self.button_play)  
+        self.d6.addWidget(self.button_backward)  
+        self.d6.addWidget(self.button_forward)  
+        self.d6.addWidget(self.button_reset)  
+        self.d6.addWidget(self.saveBtn)  
+        self.d6.addWidget(self.restoreBtn)  
+       # self.layout_top.addLayout(self.top_left, 15)  
 
         #Anim 3D
         # self.D3_holder = QWidget(parent=self.mainWidget )
         self.w = gl.GLViewWidget(parent=parent)
-        self.layout_top.addWidget(self.w, 85)  # 80% of the width
+        self.d1.addWidget(self.w, 85)  # 80% of the width
 
         # Plot
         self.plots = pg.GraphicsWindow(title="Basic plotting ")
         pg.setConfigOptions(antialias=True)
-        self.layout_bottom.addWidget(self.plots, 20)  # 80% of the width
+        self.d2.addWidget(self.plots, 20)  # 80% of the width
 
         #self.mainWidget.setLayout(self.layout)
 
-        self.timer = QtCore.QTimer(self.mainWidget)
+        self.timer = QtCore.QTimer(self.area)
 
         #self.w = gl.GLViewWidget()
         self.w.opts["distance"] = 160
@@ -359,6 +379,7 @@ class Visualizer3D(object):
 
             pitch = self.df["pitch"].iloc[i]
             roll = self.df["roll"].iloc[i]
+            nb_g = self.df["nbG_tot"].iloc[i]
             yaw = self.df["yaw"].iloc[i]
             lat = self.df["lat_m"].iloc[i]
             lon = self.df["lon_m"].iloc[i]
@@ -374,7 +395,7 @@ class Visualizer3D(object):
             #Update arrow:
             self.custom['arrow_alt'].setPos(time0_s, alt)
             self.custom['arrow_pitch'].setPos(time0_s, pitch)
-            self.custom['arrow_roll'].setPos(time0_s, roll)
+            self.custom['arrow_nb_g'].setPos(time0_s, nb_g)
             self.custom['arrow_yaw'].setPos(time0_s, yaw)
 
             #Update 3D body
