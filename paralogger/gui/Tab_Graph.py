@@ -30,20 +30,24 @@ import numpy as np #Maybe useless
 import pyqtgraph as pg
 from pyqtgraph.dockarea import *
 
+#from ..judge import Judge
+
 def generated_layout(mdf):
     if len(mdf)>2 :
 
         area = DockArea()
 
         # Creat the docks
-        d1 = Dock("Dock1 - altitude", size=(100, 150), closable=True)  
-        d2 = Dock("Dock3 - Pitch",  closable=True)
-        d3 = Dock("Dock4 - Nb_g",  closable=True)
-        d4 = Dock("Dock5 - Yaw",  closable=True)
+        d1 = Dock("D1 - altitude", size=(100, 150), closable=True)  
+        d2 = Dock("D2 - Pitch",  closable=True)
+        d3 = Dock("D3 - Nb_g",  closable=True)
+        d4 = Dock("D4 - Yaw",  closable=True)
+        d5 = Dock("D5 - Values",  closable=True)
         
 
 
         area.addDock(d1, 'left')      ## place d1 at left edge of dock area (it will fill the whole space since there are no other docks yet)
+        area.addDock(d5, 'top', d1)      ## place d1 at left edge of dock area (it will fill the whole space since there are no other docks yet)
         area.addDock(d2, 'right', d1)     ## place d2 at right edge of dock area
         area.addDock(d3, 'above', d2)## place d3 at bottom edge of d1
         area.addDock(d4, 'above', d2)## place d3 at bottom edge of d1
