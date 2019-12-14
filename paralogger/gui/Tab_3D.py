@@ -7,6 +7,8 @@ Generated the widget emmbede in the main display windows , on the 3D tab
 Cretaed a 3D view of the section and some live graph around
 
 TODO Pass the layout using Area from pyqtGrpah for more flexibily
+
+note:  We display de data where only the latitude is not null and  the dataframe is modify to have a re calibartion only  on pitch , rolll.
 """
 
 

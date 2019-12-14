@@ -423,7 +423,7 @@ class Video_File:
         return '%s' % (self.device)
 
     def __init__(self, mfilePath, mdevice):
-        logger.info("Data_File ")
+        logger.info("Video_File ")
 
         self.version = 1  # version of the Video_file model
         self.file_path = mfilePath
