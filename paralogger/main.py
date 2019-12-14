@@ -22,7 +22,7 @@ from enum import Enum
 
 from logging.handlers import RotatingFileHandler
 
-from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
+from pyqtgraph.Qt import QtCore, QtGui, QtWidgets 
 import pyqtgraph.console
 import pyqtgraph as pg
 
@@ -35,6 +35,7 @@ from gui.Tab_Table import pandasTableModel
 from import_log import import_log_diaglog
 from list_param import Position, Device, Kind
 from model import Flight, Sections, getSystemInfo, timeit
+from judge import Judge
 
 os.environ["DISPLAY"] = ":0"  #Use for linux  on vscode at least
 
@@ -109,7 +110,9 @@ class Prog(QtGui.QMainWindow):
 
         #Set up variable
         self.flight = None
-        self.visualizer_3d = None        
+        self.visualizer_3d = None      
+        self.judge = None 
+        self.load_judge_file()
 
         #add Action
         self.ui.actionOpen.triggered.connect(self.open_pickle_file)
@@ -144,13 +147,21 @@ class Prog(QtGui.QMainWindow):
         self.ui.tab_console.setLayout(mainLayout_console)
         logger.info(" interactive console ready")
 
-      
+
+
+
 
 
     def debug(self):
         ''' only use for speed up de developement
         '''
         self.open_pickle_file("Flight2_gourdon_v0-2-0.pkl")
+
+    def load_judge_file(self,judge_path = "judge1.json" ):
+        try:
+            self.judge = Judge(judge_path) 
+        except Exception as ex:
+                logger.error(ex)
 
     def open_pickle_file(self, filename=None): 
         """Function to import a file already saved, format is classic python pickle .pkl
@@ -321,6 +332,7 @@ class Prog(QtGui.QMainWindow):
             self.display_tab_graph(uid)
             self.display_tab_Table(uid)
             self.display_tab_3D(uid)
+            self.display_tab_analysis(uid)
 
             self.populate(uid, level)
 
@@ -460,6 +472,51 @@ class Prog(QtGui.QMainWindow):
             mainLayout = QtWidgets.QVBoxLayout()
             mainLayout.addWidget(self.visualizer_3d.area)
             self.ui.tab_3d.setLayout(mainLayout)
+
+    def display_tab_analysis(self, uid):
+        logger.debug(" in display_tab_analysis")
+        logger.debug(self.judge)
+
+        df_to_analysis = self.flight.apply_section(uid)
+        section = self.flight.section_by_id(uid)
+
+        logger.debug(section)
+        logger.debug(df_to_analysis.info())
+
+
+        if self.judge != None :
+            logger.debug("judge not null")
+            hash_judge , hash_dict_crit = self.judge.hash_state()
+            self.ui.label_judge_file.setText(self.judge.file_path)
+            self.ui.label_hash_judge_value.setText(hash_judge)
+            self.ui.label_hash_crit_value.setText(hash_dict_crit)
+
+
+            table_analysis = self.ui.tableWidget_analysis
+
+            result_section = self.judge.run(df_to_analysis,section.kind.value)
+            row_count = (len(result_section))
+            column_count = (3)
+
+            table_analysis.setColumnCount(column_count) 
+            table_analysis.setRowCount(row_count)
+
+            table_analysis.setHorizontalHeaderLabels(["Test" ,"Value","unit","Grade"])
+
+            for key, value in result_section.items():
+                currentRowCount = table_analysis.rowCount() 
+
+                table_analysis.insertRow(currentRowCount)
+                
+                #necessary even when there are no rows in the table
+                table_analysis.setItem(currentRowCount, 0, QtGui.QTableWidgetItem(str(key)))
+                table_analysis.setItem(currentRowCount, 1, QtGui.QTableWidgetItem(str(value["value"])))
+                table_analysis.setItem(currentRowCount, 2, QtGui.QTableWidgetItem(str(value["grade"])))
+
+            # for row in range(row_count):  # add items from array to QTableWidget
+            #     for column in range(column_count):
+            #         item = (list(result_section[row].values())[column])
+            #         table_analysis.setItem(row, column, QTableWidgetItem(item))
         
 
     def display_tab_Table(self, uid):

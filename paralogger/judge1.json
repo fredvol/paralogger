@@ -38,6 +38,43 @@
                 "unit": "\u00b0"
             }
         },
+        "Asym": {
+            "1": {
+                "breakpoint": [
+                    -100,
+                    -60,
+                    -40,
+                    -20
+                ],
+                "function": "altitude_lost",
+                "name": "Altitude lost",
+                "rates": [
+                    "F",
+                    "D",
+                    "C",
+                    "B",
+                    "A"
+                ],
+                "unit": "m"
+            },
+            "2": {
+                "breakpoint": [
+                    20,
+                    30,
+                    45,
+                    50
+                ],
+                "function": "pitch_max",
+                "name": "Maximun pitch",
+                "rates": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                "unit": "\u00b0"
+            }
+        },
         "Frontal": {
             "1": {
                 "breakpoint": {
