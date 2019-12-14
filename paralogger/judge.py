@@ -5,6 +5,8 @@ PARALOGER ANALYSIS
 Judge class
 Use to extract numeric value and add classify them 
 
+TODO : gui for critreria dictionaary edition
+
 """
 
 
@@ -47,7 +49,7 @@ class Judge:
 
     """
     def __repr__(self):
-        return 'Judge v%s, %s , %s' % (self.version, self.file_path, self.dict_criteria)
+        return 'Judge v%s, %s , %s' % (self.version, self.file_path, self.hash_state())
 
     def __init__(self, mfilePath=None,):
         logger.info("Init judge")
@@ -60,7 +62,7 @@ class Judge:
 
         if mfilePath != None:
             self.load_judge(self.file_path)
-            self.hash_state()
+            self.file_path = mfilePath
 
     def hash_state(self):
         """Compute hash of the judge and  a other one of the criteria dict.
@@ -78,6 +80,11 @@ class Judge:
         return str(self_hash) , str(dict_crit_hash)
     
     def load_judge(self,mpath):
+        """load judge object for Json file
+        
+        Arguments:
+            mpath {str} -- path of the file to laod
+        """
         self.file_path = mpath
         with open(self.file_path, 'r') as file:
             judge_string = file.read()
@@ -86,11 +93,30 @@ class Judge:
         self.hash_state()
 
     def save_judge(self,mpath):
+        """save a judge object to Json file
+        
+        Arguments:
+            mpath {str} -- path of the file to save
+        """
         judge_freeze = jsonpickle.encode(self)
         with open(mpath, 'w') as fp:
             fp.write(judge_freeze)
 
     def grade(self,score, mbreakpoint, mgrades=None):
+        """Grade a test  according to a score , and some breakpoint
+        
+        Arguments:
+            score {float} -- value to evaluated ( ex : 43m)
+            mbreakpoint {list} -- list of the value where the grade should change ([-100 , -60, -40 , -20])
+        
+        Keyword Arguments:
+            mgrades {list} -- list of grade corresponding to the breakpoint (default: {None})
+        
+        Returns:
+            str -- the grade string corresponding to the score
+
+        note the the breakpoint should be in ascendant order
+        """
         if mgrades == None or mbreakpoint == None:
             return None
         i = bisect.bisect_left(mbreakpoint,score)
@@ -98,13 +124,27 @@ class Judge:
 
   
     def run(self,df, sect_type) :
-        result_section = {}
+        """Execute the Judge 
+        Apply  test criteria on a dataframe  accoridng to  teh section type
+        
+        Arguments:
+            df {Dataframe} -- Dataframe of teh sections
+            sect_type {str from enum Section Kind} -- kind of section
+        
+        Returns:
+            Dict -- Result type for each test ( test_name,  score, unit and grade)
+        """
+        result_section = {} # dictionarry to return 
+
+        #Select the subdictionary criteria according to the sections type
         dict_crit=self.dict_criteria[sect_type]
 
         for key, details in dict_crit.items():
-            method_to_call = getattr(self, details['function'])
+            method_to_call = getattr(self, details['function'])  #call the function to evaluate
             result = method_to_call(df,details['breakpoint'], details['rates'])
-        # result = altitude_lost(df,details['breakpoint'], details['rates'])
+            result['unit'] = details['unit']
+
+            #append to test result dict  to the section result dict
             result_section[details['name']] = result
 
         return result_section

@@ -441,7 +441,6 @@ class Prog(QtGui.QMainWindow):
         except Exception as ex:
             logger.error(ex)
 
-            
 
     #### TAB WIDGET ACTIONS ###
     # This section manage all the Tab ins the view part of the main windows.
@@ -485,38 +484,30 @@ class Prog(QtGui.QMainWindow):
 
 
         if self.judge != None :
-            logger.debug("judge not null")
             hash_judge , hash_dict_crit = self.judge.hash_state()
-            self.ui.label_judge_file.setText(self.judge.file_path)
+            self.ui.label_judge_file.setText(str(self.judge))
             self.ui.label_hash_judge_value.setText(hash_judge)
             self.ui.label_hash_crit_value.setText(hash_dict_crit)
-
 
             table_analysis = self.ui.tableWidget_analysis
 
             result_section = self.judge.run(df_to_analysis,section.kind.value)
-            row_count = (len(result_section))
-            column_count = (3)
+
+            column_name = ["Test" ,"Value","unit","Grade"]
+            column_count = (len(column_name))
 
             table_analysis.setColumnCount(column_count) 
-            table_analysis.setRowCount(row_count)
 
-            table_analysis.setHorizontalHeaderLabels(["Test" ,"Value","unit","Grade"])
+            table_analysis.setHorizontalHeaderLabels(column_name)
 
             for key, value in result_section.items():
                 currentRowCount = table_analysis.rowCount() 
 
                 table_analysis.insertRow(currentRowCount)
-                
-                #necessary even when there are no rows in the table
                 table_analysis.setItem(currentRowCount, 0, QtGui.QTableWidgetItem(str(key)))
                 table_analysis.setItem(currentRowCount, 1, QtGui.QTableWidgetItem(str(value["value"])))
-                table_analysis.setItem(currentRowCount, 2, QtGui.QTableWidgetItem(str(value["grade"])))
-
-            # for row in range(row_count):  # add items from array to QTableWidget
-            #     for column in range(column_count):
-            #         item = (list(result_section[row].values())[column])
-            #         table_analysis.setItem(row, column, QTableWidgetItem(item))
+                table_analysis.setItem(currentRowCount, 2, QtGui.QTableWidgetItem(str(value["unit"])))
+                table_analysis.setItem(currentRowCount, 3, QtGui.QTableWidgetItem(str(value["grade"])))
         
 
     def display_tab_Table(self, uid):
