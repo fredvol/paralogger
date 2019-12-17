@@ -418,7 +418,7 @@ class Data_File:
 
     def add_quaternion_work(self):
         logger.debug("add_quaternion_work TBD")
-        add_rk_angle(self.df)
+        #add_rk_angle(self.df)
 
 
 class Video_File:
