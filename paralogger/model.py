@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 import pip
 
-from import_ulog import ulog_list_data, ulog_param, ulog_to_df ,add_rk_angle
+from import_ulog import ulog_list_data, ulog_param, ulog_to_df, add_rk_angle
 from list_param import Device, Kind, Position
 
 
@@ -334,8 +334,8 @@ class Sections:
         ! In the future will be better to use the Quaternion instead of the euler angle TODO
         """
         mask = (df["time0_s"] > t_start) & (df["time0_s"] <= t_end)
-
-
+        
+        r_BX = add_rk_angle(df,mask)
         avg_pitch = df.loc[mask, 'pitch'].mean()
         avg_roll = df.loc[mask, 'roll'].mean()
         avg_yaw = df.loc[mask, 'yaw'].mean() # Yaw need to be calibrated using the GPS track. TODO
@@ -347,9 +347,10 @@ class Sections:
         logger.debug( ' avg_pitch :' + str(avg_pitch) + " rad so: " + str(np.rad2deg(avg_pitch)) + " deg")
         logger.debug( ' avg_roll :' + str(avg_roll) + " rad so: " + str(np.rad2deg(avg_roll)) + " deg")
         #logger.debug( ' avg_yaw :' + str(avg_yaw) + " rad so: " + str(np.rad2deg(avg_yaw)) + " deg" + " wanted (deg): "+ str(start_yaw_angle_deg))
-        
-        self.calibration = {"pitch" : avg_pitch , "roll" :avg_roll , "yaw" : avg_yaw }
-        return {"pitch" : avg_pitch , "roll" :avg_roll , "yaw" : avg_yaw }
+        logger.debug( ' vert paraglider vector r in BX coord :' + str(r_BX))
+
+        self.calibration = {"pitch" : avg_pitch , "roll" :avg_roll  , "r_BX" : r_BX }
+        return {"pitch" : avg_pitch , "roll" :avg_roll , "yaw" : avg_yaw , "r_BX" : r_BX }
     
     def get_calibration(self):
         return self.calibration
@@ -416,8 +417,8 @@ class Data_File:
         return {"timestamp_start": timestamp_start, "timestamp_end": timestamp_end}
 
     def add_quaternion_work(self):
-        logger.debug("add_quaternion_work")
-        add_rk_angle(self.df)
+        logger.debug("add_quaternion_work TBD")
+        #add_rk_angle(self.df)
 
 
 class Video_File:
