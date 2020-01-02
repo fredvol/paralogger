@@ -27,9 +27,9 @@ import pandas as pd
 
 FFMPEG = "/usr/bin/ffmpeg"
 
-def myconverter(o):
-    if isinstance(o, datetime.datetime):
-        return o.__str__()
+# def myconverter(o):
+#     if isinstance(o, datetime.datetime):
+#         return o.__str__()
 
 def dump_metadata(filename):
 	(o,e) = Popen([FFMPEG, '-y', '-i', filename, '-codec', 'copy', '-map', '0:3', '-f', 'rawvideo','-'],stdout=PIPE,stderr=PIPE).communicate()
@@ -154,31 +154,31 @@ def gopro_binary_to_csv(gopro_binary):
     return csv_data
 
 
-def make_gpx(points, fd):
-	print("""
-<?xml version="1.0" encoding="UTF-8"?>
-<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1" creator="gopro2gpx.py">
- <trk>
-  <trkseg>
-  """, 
-		file=fd,
-	)
-	for p in points:
-		print(
-			'   <trkpt lat="{}" lon="{}"><time>{}</time></trkpt>'.format(
-				p['latitude'],
-				p['longitude'],
-				p['timestamp'].strftime("%Y-%m-%dT%H:%M:%SZ"),
-			),		
-			file=fd,
-		)
-	print("""
-  </trkseg>
- </trk>
-</gpx>
-""", 
-		file=fd,
-	)
+# def make_gpx(points, fd):
+# 	print("""
+# <?xml version="1.0" encoding="UTF-8"?>
+# <gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1" creator="gopro2gpx.py">
+#  <trk>
+#   <trkseg>
+#   """, 
+# 		file=fd,
+# 	)
+# 	for p in points:
+# 		print(
+# 			'   <trkpt lat="{}" lon="{}"><time>{}</time></trkpt>'.format(
+# 				p['latitude'],
+# 				p['longitude'],
+# 				p['timestamp'].strftime("%Y-%m-%dT%H:%M:%SZ"),
+# 			),		
+# 			file=fd,
+# 		)
+# 	print("""
+#   </trkseg>
+#  </trk>
+# </gpx>
+# """, 
+# 		file=fd,
+# 	)
 
 
 def mp4_gmpf_to_df(file_path):
@@ -213,7 +213,8 @@ if __name__ == "__main__":
     df.to_json (exit_file + ".json")
 
 
-	# #output_file
+	# #output_file GPX
+
     # with open(exit_file+".csv","w") as fd:
 	#     print("Writing output to {}".format(exit_file))
 	# 	#make_gpx(points, fd) # output a simple gpx
