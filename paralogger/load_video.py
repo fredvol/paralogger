@@ -182,14 +182,24 @@ def make_gpx(points, fd):
 
 
 def mp4_gmpf_to_df(file_path):
+    """Function to extract gmpf data from mp4 file.
+    
+    Keyword Arguments:
+        filename {[str]} -- MP4 file path 
+    
+    Returns:
+        [dataframe] -- a dataframe with the extracted data.
+    """   
 
     dict_data = gopro_binary_to_csv(dump_metadata(file_path))
     df= pd.DataFrame.from_dict(dict_data)
+    df.rename(columns={"timestamp": "Full_date"}, inplace=True)
+    df['timestamp']=df['Full_date'].apply(lambda x: datetime.datetime.timestamp(x))
+    df.drop(columns=['Rtimestamp'], inplace = True)
     return df
 
-#%%
-file_path= "samples/GH013429.MP4"
-df = mp4_gmpf_to_df(file_path)
+
+
 
 
 #%%
@@ -197,15 +207,11 @@ if __name__ == "__main__":
 
 
     exit_file= "outd"
-    
-    points = list()
-    print("Processing {}".format(file_path))
-    points.extend(gopro_binary_to_csv(dump_metadata(file_path)))
+    file_path= "samples/GH013429.MP4"
+    df = mp4_gmpf_to_df(file_path)
 
+    df.to_json (exit_file + ".json")
 
-    with open(exit_file+".json", 'w') as json_file:
-        print("Writing json output to {}".format(exit_file))
-        json.dump(points, json_file, default = myconverter)
 
 	# #output_file
     # with open(exit_file+".csv","w") as fd:
@@ -215,3 +221,4 @@ if __name__ == "__main__":
 
 
 # %%
+# df['n1']=df['timestamp'].apply(lambda x: datetime.datetime.timestamp(x))
