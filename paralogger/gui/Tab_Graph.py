@@ -36,10 +36,10 @@ def generated_layout(mdf):
         area = DockArea()
 
         # Creat the docks
-        d1 = Dock("Dock1 - altitude", size=(100, 150), closable=True)  
-        d2 = Dock("Dock3 - Pitch",  closable=True)
-        d3 = Dock("Dock4 - Nb_g",  closable=True)
-        d4 = Dock("Dock5 - Yaw",  closable=True)
+        d1 = Dock("D1 - altitude", size=(100, 150), closable=True)  
+        d2 = Dock("D2 - Pitch",  closable=True)
+        d3 = Dock("D3 - Nb_g",  closable=True)
+        d4 = Dock("D4 - Yaw",  closable=True)
         
 
 
