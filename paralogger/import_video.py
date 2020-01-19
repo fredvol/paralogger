@@ -5,14 +5,7 @@ PARALOGER ANALYSIS
 Load video
 Process the gopro metadat to extract the gps time
 
-TODO Everything
-
-Links to start:
-
-https://github.com/jin-zhe/gopro
-https://github.com/juanmcasillas/gopro2gpx/blob/master/gopro2gpx.py
-https://github.com/gopro/gpmf-parser
-
+link:
 https://community.gopro.com/t5/GoPro-Metadata-Visualization-GPS/Extracting-the-metadata-in-a-useful-format/gpm-p/40293/page/17?profile.language=fr
 """
 #%%
@@ -24,6 +17,9 @@ from subprocess import Popen, PIPE
 from io import BytesIO
 import numpy as np 
 import pandas as pd 
+
+import logging
+logger = logging.getLogger("import_video")
 
 FFMPEG = "/usr/bin/ffmpeg"
 
@@ -190,17 +186,21 @@ def mp4_gmpf_to_df(file_path):
     Returns:
         [dataframe] -- a dataframe with the extracted data.
     """   
-
+    logger.debug("Process mp4 : " + str(file_path))
     dict_data = gopro_binary_to_csv(dump_metadata(file_path))
     df= pd.DataFrame.from_dict(dict_data)
+
+    logger.debug("df mp4 shape: " + str(df.shape))
+
     df.rename(columns={"timestamp": "Full_date"}, inplace=True)
     df['timestamp']=df['Full_date'].apply(lambda x: datetime.datetime.timestamp(x))
     df.drop(columns=['Rtimestamp'], inplace = True)  #TODO understand the offset between this timestamp and the other one.
     return df
 
 
-
-
+#%%
+file_path= "samples/GH013429.MP4"
+df = mp4_gmpf_to_df(file_path)
 
 #%%
 if __name__ == "__main__":

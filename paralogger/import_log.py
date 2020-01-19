@@ -60,7 +60,8 @@ class import_log_diaglog(QDialog):
         #set up button
         self.ui.button_debug.clicked.connect(self.debug_)
         self.ui.button_import.clicked.connect(self.import_flight)
-        self.ui.pushButton_import_file_log1.clicked.connect(self.browse_path)
+        self.ui.pushButton_import_file_log1.clicked.connect(self.browse_path_log1)
+        self.ui.pushButton_import_file_video.clicked.connect(self.browse_path_video)
 
         self.check_valid()
 
@@ -74,7 +75,7 @@ class import_log_diaglog(QDialog):
         """Quickly populate all flied for rapid debug
         """
         logger.debug("Populate with dummy values")
-        file_name = "/home/fred/Ozone/paralogger/paralogger/samples/log_6_2019-11-6-13-32-36_flight_1.ulg"
+        file_name = "/home/fred/Ozone/paralogger/paralogger/samples/log_23_2019-11-26-12-09-10.ulg"
 
         self.ui.label_file_log_1.setText(file_name)
         self.ui.gliderModelLineEdit.setText("Macpi4")
@@ -90,13 +91,21 @@ class import_log_diaglog(QDialog):
         QGuiApplication.processEvents() # would be better to use a progressbar
 
 
-    def browse_path(self):
-        filename = QFileDialog.getOpenFileName(self, 'Open pickler File', "", 'Logs Files (*.*)')
+    def browse_path_log1(self):
+        filename = QFileDialog.getOpenFileName(self, 'Open log file File', "", 'Logs Files (*.*)')
 
         if isinstance(filename, tuple):
             filename = filename[0]
         if filename: 
             self.ui.label_file_log_1.setText(filename)
+
+    def browse_path_video(self):
+        filename = QFileDialog.getOpenFileName(self, 'Open video File', "", 'MP4 Files (*.mp4)')
+
+        if isinstance(filename, tuple):
+            filename = filename[0]
+        if filename: 
+            self.ui.label_file_video.setText(filename)
 
 
     def import_flight(self):
@@ -124,11 +133,25 @@ class import_log_diaglog(QDialog):
         weight = self.ui.weightKgDoubleSpinBox.value()
         lab = self.ui.laboratoryLineEdit.text()
 
+        # Update the user
+        self.update_label_status("Loading in progress: Log file, please wait  ... ")
+        self.update()
+
         self.imported_Flight.add_data_file(ulog_file_path, ulog_device, ulog_position)
         self.imported_Flight.add_info( manufacturer_name, glider_name,size, modif, pilot, weight, location,lab)
         self.imported_Flight.add_general_section()
 
+        # import video data if available
+        if len(self.ui.label_file_video.text() ) > 1 :
+            # Update the user
+            self.update_label_status("Loading in progress: video, please wait  ... ")
+            self.update()
 
+            mp4_file_path = self.ui.label_file_video.text()
+            mp4_device  = self.ui.deviceComboBox_video_device.currentData()
+
+            logger.debug("import video data from : " + str(mp4_file_path))
+            self.imported_Flight.add_video_file(mp4_file_path, mp4_device)
 
         logger.debug("close import dialog")
 

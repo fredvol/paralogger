@@ -23,8 +23,9 @@ import pandas as pd
 import pip
 
 from import_ulog import ulog_list_data, ulog_param, ulog_to_df
-from list_param import Device, Kind, Position
+from list_param import Device, Kind, Position, VideoDevice
 
+from import_video import mp4_gmpf_to_df
 logger = logging.getLogger("model")
 
 # Local imports:
@@ -127,6 +128,7 @@ class Flight:
         self.laboratory = None      # Labo name
 
         self.data = []              # List of all the data file
+        self.video_data = []        # List of all the data file from video file
 
         self.sections = []          # List of Sections object
 
@@ -146,6 +148,21 @@ class Flight:
         mData_File.populated_device_param() # Extrcat the paramters  of the device.
 
         self.data.append(mData_File)
+
+    @timeit
+    def add_video_file(self, mfilePath, mdevice):
+        """Add detail/metadata of a mp4 file and process it
+        
+        Arguments:
+            mfilePath {str} -- mp4 file path
+            mdevice {str} -- Device/Camera type information
+        """
+
+        mVideo_File = Video_File(mfilePath, mdevice) # Crete the object Data file 
+        mVideo_File.populate_df()  # Process the raw data
+
+
+        self.video_data.append(mVideo_File)
 
     def add_info(self, mmanufacturer, mglider,msize, mmodif, mpilot, mweight, mlocation,mlabo):
         """ Add Mete information on the flight
@@ -380,7 +397,7 @@ class Data_File:
 
 
     def __repr__(self):
-        return '%s (%s) ' % (self.position, str(self.df.shape))
+        return 'data: %s (%s) ' % (self.position, str(self.df.shape))
 
     def populate_df(self):
         """Function importing raw data form log file
@@ -420,7 +437,8 @@ class Video_File:
 
     """
     def __repr__(self):
-        return '%s' % (self.device)
+        def __repr__(self):
+        return 'video: %s (%s) ' % (self.position, str(self.df_video))
 
     def __init__(self, mfilePath, mdevice):
         logger.info("Video_File ")
@@ -431,9 +449,17 @@ class Video_File:
         self.file_sha1 = None
         self.device = mdevice
 
-        self.file_sha1 = sha256sum(self.file_path)
+        self.df_video = None
 
+        self.file_sha1 = sha256sum(self.file_path)
         self.file_date = time.ctime(os.path.getctime(self.file_path))
+
+    def populate_df(self):
+        """Function importing metadata form mp4 file
+        """
+        logger.info("populate_df from mp4 ")
+        if self.device == VideoDevice.GOPRO_7 or VideoDevice.GOPRO_3:
+            self.df_video = mp4_gmpf_to_df(self.file_path)
 
 
 
