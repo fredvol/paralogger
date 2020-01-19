@@ -195,7 +195,7 @@ def mp4_gmpf_to_df(file_path):
     df= pd.DataFrame.from_dict(dict_data)
     df.rename(columns={"timestamp": "Full_date"}, inplace=True)
     df['timestamp']=df['Full_date'].apply(lambda x: datetime.datetime.timestamp(x))
-    df.drop(columns=['Rtimestamp'], inplace = True)
+    df.drop(columns=['Rtimestamp'], inplace = True)  #TODO understand the offset between this timestamp and the other one.
     return df
 
 
