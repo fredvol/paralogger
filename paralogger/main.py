@@ -8,7 +8,7 @@ Main file , start Point.
 """
 __credits__ = ["Mattleg", "Bruno D", "Fred P"]
 __license__ = "GPL V3"
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 __pickle_file_version__ = 2  #This will help to detect previous version of pkl file when imported
 
 import logging
@@ -155,7 +155,7 @@ class Prog(QtGui.QMainWindow):
     def debug(self):
         ''' only use for speed up de developement
         '''
-        self.open_pickle_file("Flight2_gourdon_v0-2-0.pkl")
+        self.open_pickle_file("samples/Flight2_gourdon_v0-2-0.pkl")   #linux path
 
     def load_judge_file(self,judge_path = "judge1.json" ):
         try:
