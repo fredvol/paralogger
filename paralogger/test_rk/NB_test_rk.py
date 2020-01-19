@@ -18,15 +18,15 @@ import glob
 import os
 import matplotlib.pyplot as plt
 
+import numpy as np
 import pandas as pd
 
 
 #%%  MAIN 
 print("\n---START---")
 
-Reload_file = False
-
-Folder_path= 'test_rk/'
+#Folder_path= 'test_rk/'
+Folder_path= ''
 
 list_file= glob.glob(Folder_path+'*.csv')
 tot_file=len(list_file)
@@ -34,11 +34,10 @@ print(" file found ("+ str(tot_file) +") :")
 for name in list_file:
     print(name)
 
-#list_file = ['sample_log/log_0_2019-9-14-21-54-24.ulg','sample_log/log_14_2019-9-24-23-31-14.ulg']
-#%% sort list
+#%% sort file list
+
 def get_key(mstr):
     return int(mstr.split("/")[-1].split("-")[0])
-
 
 list_file = sorted(list_file, key=get_key)
 
@@ -61,11 +60,17 @@ for file_csv in  list_file:
 
 # %% plot
 
-#to popup graph if interactive :
+#  to popup graph if interactive :
 #  %matplotlib qt
 col_to_plot= dfg.filter(like='rk', axis=1).columns
+
+#convert rad to deg 
+for col in col_to_plot:
+    dfg[col] = np.rad2deg(dfg[col])
+
 
 dfg.plot(x="timestamp", y=col_to_plot, kind="line")
 
 
 # %%
+print("end")
