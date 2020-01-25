@@ -422,12 +422,10 @@ class Data_File:
         """
         timestamp_start = (
             self.df[~self.df["time_utc_usec"].isnull()].iloc[0]["time_utc_usec"]
-            / 10 ** 6
-        )
+            / 10 ** 6)
         timestamp_end = (
             self.df[~self.df["time_utc_usec"].isnull()].iloc[-1]["time_utc_usec"]
-            / 10 ** 6
-        )
+            / 10 ** 6)
 
         return {"timestamp_start": timestamp_start, "timestamp_end": timestamp_end}
 
@@ -437,7 +435,6 @@ class Video_File:
 
     """
     def __repr__(self):
-        def __repr__(self):
         return 'video: %s (%s) ' % (self.position, str(self.df_video))
 
     def __init__(self, mfilePath, mdevice):

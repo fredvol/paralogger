@@ -113,3 +113,5 @@ paralogger/samples/csv/
 *.pkl
 
 *.MP4
+
+paralogger/envparalogger/
