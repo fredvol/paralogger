@@ -1,6 +1,6 @@
-#coding:utf-8
+# coding:utf-8
 """
-PARALOGER ANALYSIS 
+PARALOGER ANALYSIS
 
 File generating the Import log dialog in the GUI.
 
@@ -16,24 +16,28 @@ import pandas as pd
 import numpy as np
 
 from model import Flight, timeit
-from list_param import Device, Position ,VideoDevice
+from list_param import Device, Position, VideoDevice
 
 from gui.import_log_gui import Ui_Dialog_import_log
 
 import logging
+
 logger = logging.getLogger("import_log")
 from PyQt5.QtWidgets import QDialog, QWidget, QProgressDialog
-from PyQt5.QtGui import QFileDialog , QGuiApplication
-from PyQt5.QtCore import QRect 
 
-def populate_combo_box( combo , class_param):
+from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtGui import QGuiApplication
+
+from PyQt5.QtCore import QRect
+
+
+def populate_combo_box(combo, class_param):
     for p in class_param:
-        combo.addItem(p.name,p)
+        combo.addItem(p.name, p)
 
     # list_param = [i for i in dir(class_param) if not "__" in i]
     # for val in list_param:
     #     combo.addItem(getattr(class_param, val))
-
 
 
 class import_log_diaglog(QDialog):
@@ -53,26 +57,27 @@ class import_log_diaglog(QDialog):
 
         populate_combo_box(self.ui.deviceComboBox_video_device, VideoDevice)
 
-        self.ui.positionComboBox.setCurrentIndex(self.ui.positionComboBox.findText(Position.PILOT.name)) # to have pilot as default position
-        self.ui.deviceComboBox.setCurrentIndex(self.ui.deviceComboBox.findText(Device.PIXRACER.name)) # to have pixracer as default position
+        self.ui.positionComboBox.setCurrentIndex(
+            self.ui.positionComboBox.findText(Position.PILOT.name)
+        )  # to have pilot as default position
+        self.ui.deviceComboBox.setCurrentIndex(
+            self.ui.deviceComboBox.findText(Device.PIXRACER.name)
+        )  # to have pixracer as default position
 
-
-        #set up button
+        # set up button
         self.ui.button_debug.clicked.connect(self.debug_)
         self.ui.button_import.clicked.connect(self.import_flight)
         self.ui.pushButton_import_file_log1.clicked.connect(self.browse_path)
 
         self.check_valid()
 
-        #set up line edit:
+        # set up line edit:
         self.ui.gliderModelLineEdit.textChanged.connect(self.check_valid)
 
         self.imported_Flight = None
 
-
     def debug_(self):
-        """Quickly populate all flied for rapid debug
-        """
+        """Quickly populate all flied for rapid debug"""
         logger.debug("Populate with dummy values")
         file_name = "/home/fred/Ozone/paralogger/paralogger/samples/log_6_2019-11-6-13-32-36_flight_1.ulg"
 
@@ -87,33 +92,33 @@ class import_log_diaglog(QDialog):
 
     def update_label_status(self, str_message):
         self.ui.label_status.setText(str_message)
-        QGuiApplication.processEvents() # would be better to use a progressbar
-
+        QGuiApplication.processEvents()  # would be better to use a progressbar
 
     def browse_path(self):
-        filename = QFileDialog.getOpenFileName(self, 'Open pickler File', "", 'Logs Files (*.*)')
+        filename = QFileDialog.getOpenFileName(
+            self, "Open pickler File", "", "Logs Files (*.*)"
+        )
 
         if isinstance(filename, tuple):
             filename = filename[0]
-        if filename: 
+        if filename:
             self.ui.label_file_log_1.setText(filename)
-
 
     def import_flight(self):
         """Create a Flight object, read the raw log file and add meta data .
-        TODO mange if device != Pixracer 
+        TODO mange if device != Pixracer
         """
-        
+
         self.update_label_status("Loading in progress, please wait  ...")
         self.update()
 
-        logger.debug('import flight .......')
+        logger.debug("import flight .......")
 
         self.imported_Flight = Flight()
-        
+
         ulog_file_path = self.ui.label_file_log_1.text()
-        ulog_device  = self.ui.deviceComboBox.currentData()
-        ulog_position  = self.ui.positionComboBox.currentData()
+        ulog_device = self.ui.deviceComboBox.currentData()
+        ulog_position = self.ui.positionComboBox.currentData()
 
         glider_name = self.ui.gliderModelLineEdit.text()
         manufacturer_name = self.ui.manufacturerLineEdit.text()
@@ -125,24 +130,19 @@ class import_log_diaglog(QDialog):
         lab = self.ui.laboratoryLineEdit.text()
 
         self.imported_Flight.add_data_file(ulog_file_path, ulog_device, ulog_position)
-        self.imported_Flight.add_info( manufacturer_name, glider_name,size, modif, pilot, weight, location,lab)
+        self.imported_Flight.add_info(
+            manufacturer_name, glider_name, size, modif, pilot, weight, location, lab
+        )
         self.imported_Flight.add_general_section()
-
-
 
         logger.debug("close import dialog")
 
-
         self.close()
 
-
     def check_valid(self):
-        """Check if the  required field and ok  to enble the import.
-        """
-        check_list=[]
-        item_to_check = [self.ui.gliderModelLineEdit,
-                        self.ui.label_file_log_1
-                            ]
+        """Check if the  required field and ok  to enble the import."""
+        check_list = []
+        item_to_check = [self.ui.gliderModelLineEdit, self.ui.label_file_log_1]
 
         for item in item_to_check:
             check_list.append(len(item.text()) < 1)
@@ -152,4 +152,3 @@ class import_log_diaglog(QDialog):
             self.ui.label_status.setText("Field with * are mandatory (OK)")
         else:
             self.ui.button_import.setEnabled(False)
-

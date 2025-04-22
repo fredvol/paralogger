@@ -1,6 +1,6 @@
-#coding:utf-8
+# coding:utf-8
 """
-PARALOGER ANALYSIS 
+PARALOGER ANALYSIS
 
 Tab 3D
 Generated the widget emmbede in the main display windows , on the 3D tab
@@ -18,6 +18,7 @@ import sys
 import pickle
 
 import logging
+
 logger = logging.getLogger("Tab_3D")
 
 import numpy as np
@@ -25,12 +26,21 @@ import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 from PyQt5.QtCore import QSize
 
-from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget, QTabWidget, QPushButton)
+from PyQt5.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+    QTabWidget,
+    QPushButton,
+    QApplication,
+)
 from pyqtgraph.Qt import QtCore, QtGui
 from pyqtgraph.dockarea import *
 
 try:
-    # It raised a exeption but it can pass 
+    # It raised a exeption but it can pass
     from geometry_modeling import Create_geom
 except:
     pass
@@ -38,8 +48,9 @@ except:
 
 #### FUNCTIONS ###########################""
 
+
 def WGS84_to_mercator(lon, lat):
-    """ Convert lon, lat in [deg] to Mercator projection 
+    """Convert lon, lat in [deg] to Mercator projection
     Code imported from  https://review.px4.io/
     """
     # alternative that relies on the pyproj library:
@@ -59,9 +70,9 @@ def WGS84_to_mercator(lon, lat):
 
 
 def map_projection(lat, lon, anchor_lat, anchor_lon):
-    """ convert lat, lon in [rad] to x, y in [m] with an anchor position 
-        Code imported from  https://review.px4.io/
-        """
+    """convert lat, lon in [rad] to x, y in [m] with an anchor position
+    Code imported from  https://review.px4.io/
+    """
     sin_lat = np.sin(lat)
     cos_lat = np.cos(lat)
     cos_d_lon = np.cos(lon - anchor_lon)
@@ -82,7 +93,11 @@ def map_projection(lat, lon, anchor_lat, anchor_lon):
             k[i] = c[i] / np.sin(c[i])
 
     CONSTANTS_RADIUS_OF_EARTH = 6371000
-    x = (k * (cos_anchor_lat * sin_lat - sin_anchor_lat * cos_lat * cos_d_lon) * CONSTANTS_RADIUS_OF_EARTH)
+    x = (
+        k
+        * (cos_anchor_lat * sin_lat - sin_anchor_lat * cos_lat * cos_d_lon)
+        * CONSTANTS_RADIUS_OF_EARTH
+    )
     y = k * cos_lat * np.sin(lon - anchor_lon) * CONSTANTS_RADIUS_OF_EARTH
 
     return x, y
@@ -90,14 +105,14 @@ def map_projection(lat, lon, anchor_lat, anchor_lon):
 
 def prepare_data(mdf):
     """Prepare the data for the 3D  plot
-    
+
     Arguments:
-        mdf {DataFrame} -- imput dataframe 
-    
+        mdf {DataFrame} -- imput dataframe
+
     Returns:
         Dataframe -- modified dataframe ( TODO need to check if copy or view?)
     """
-    
+
     mdf[["pitch", "yaw", "roll"]] = mdf[["pitch", "yaw", "roll"]].apply(np.rad2deg)
 
     # Work on Gps coordinate
@@ -108,21 +123,26 @@ def prepare_data(mdf):
     lat = np.deg2rad(lat)
     lon = np.deg2rad(lon)
 
-    anchor_lat = 0
-    anchor_lon = 0
+    # find first valid GPS fix
+    valid_idx = np.where((lat != 0) & (lon != 0))[0][0]
+    anchor_lat = lat[valid_idx]
+    anchor_lon = lon[valid_idx]
+
+    print(f"{anchor_lat =}")
+    print(f"{anchor_lon =}")
     lat, lon = map_projection(lat, lon, anchor_lat, anchor_lon)
-    lat = lat - lat[0]
-    lon = lon - lon[0]
-    altitude0 = altitude - altitude[0]
+    lat = lat - anchor_lat
+    lon = lon - anchor_lon
+    altitude0 = 0  # altitude - altitude[0]
 
     mdf["lat_m"] = lat
     mdf["lon_m"] = lon
     mdf["alt_m"] = altitude0
 
     # Reorient data (#TODO  to explore more)
-    mdf["lat_m"] = mdf["lat_m"] * 1  #x
-    mdf["lon_m"] = mdf["lon_m"] * -1  #y
-    mdf["alt_m"] = mdf["alt_m"] * 1  #z
+    mdf["lat_m"] = mdf["lat_m"] * 1  # x
+    mdf["lon_m"] = mdf["lon_m"] * -1  # y
+    mdf["alt_m"] = mdf["alt_m"] * 1  # z
     mdf["pitch"] = mdf["pitch"] * -1
     mdf["roll"] = mdf["roll"] * 1
     mdf["yaw"] = mdf["yaw"] * -1
@@ -132,18 +152,17 @@ def prepare_data(mdf):
 
 def add_plot(mdf, widget):
     """Add graph plot  at the botton
-    
+
     Arguments:
         mdf {DataFrame} -- Dataframe to use for ploting
         widget {[type]} -- Widget to add the plot in
-    
+
     Returns:
-        Add the plot in the widget 
+        Add the plot in the widget
         [Dict ] -- Dict the arrow object for reuse later  during the update loop
     """
     # # Set up each plot
     color = (0, 255, 120)
-
 
     # %% Altitude  plot
     start_altitude = mdf["alt"].iloc[0]
@@ -151,25 +170,25 @@ def add_plot(mdf, widget):
 
     p1 = widget.addPlot(title="Alt")
 
-    p1.plot(mdf['time0_s'].to_numpy(), altitude, pen=color, name="Alt [m]")
+    p1.plot(mdf["time0_s"].to_numpy(), altitude, pen=color, name="Alt [m]")
 
     # Set up an animated arrow
 
     arrow_alt = pg.ArrowItem(angle=90)
     p1.addItem(arrow_alt)
-    p1.enableAutoRange('y', True)
+    p1.enableAutoRange("y", True)
 
     # %% Pitch  plot
     pitch = mdf["pitch"].to_numpy()
     yaw = mdf["yaw"].to_numpy()
-   # roll = mdf["roll"].to_numpy()
+    # roll = mdf["roll"].to_numpy()
 
     # pitch= np.rad2deg(pitch)
     # yaw= np.rad2deg(yaw)
     # roll= np.rad2deg(roll)
 
     p2 = widget.addPlot(title="Pitch")
-    p2.plot(mdf['time0_s'].to_numpy(), pitch, pen=color, name="pitch [deg]")
+    p2.plot(mdf["time0_s"].to_numpy(), pitch, pen=color, name="pitch [deg]")
     arrow_pitch = pg.ArrowItem(angle=90)
     # p2.enableAutoScale()
     # p2.setMenuEnabled()
@@ -177,44 +196,44 @@ def add_plot(mdf, widget):
 
     p3 = widget.addPlot(title="nb_G")
     nbG_tot = mdf["nbG_tot"].to_numpy()
-    p3.plot(mdf['time0_s'].to_numpy(), nbG_tot, pen=color, name="nb_g")
+    p3.plot(mdf["time0_s"].to_numpy(), nbG_tot, pen=color, name="nb_g")
     arrow_nb_g = pg.ArrowItem(angle=90)
     p3.addItem(arrow_nb_g)
 
     p4 = widget.addPlot(title="yaw")
-    p4.plot(mdf['time0_s'].to_numpy(), yaw, pen=color, name="yaw [deg]")
+    p4.plot(mdf["time0_s"].to_numpy(), yaw, pen=color, name="yaw [deg]")
     arrow_yaw = pg.ArrowItem(angle=90)
     p4.addItem(arrow_yaw)
 
-    return {"arrow_alt": arrow_alt, "arrow_pitch": arrow_pitch, "arrow_nb_g": arrow_nb_g, "arrow_yaw": arrow_yaw}
+    return {
+        "arrow_alt": arrow_alt,
+        "arrow_pitch": arrow_pitch,
+        "arrow_nb_g": arrow_nb_g,
+        "arrow_yaw": arrow_yaw,
+    }
 
 
 class Visualizer3D(object):
-    """Main classe generating the 3D view
-    
-    """
+    """Main classe generating the 3D view"""
+
     def __init__(self, parent):
 
-
-        #area Widget containing everything
-
+        # area Widget containing everything
 
         self.area = DockArea()
 
         # Creat the docks
-        self.d1 = Dock("D1 - 3d", size=(100, 150), closable=True)  
-        self.d2 = Dock("D2 - Live Graph",  closable=True)
-        self.d3 = Dock("D3 - Nb_g",  closable=True)
-        self.d4 = Dock("D4 - Yaw",  closable=True)
-        self.d5 = Dock("D5 - values",  closable=True)
-        self.d6 = Dock("D6 - control",  closable=True)
-        
+        self.d1 = Dock("D1 - 3d", size=(100, 150), closable=True)
+        self.d2 = Dock("D2 - Live Graph", closable=True)
+        self.d3 = Dock("D3 - Nb_g", closable=True)
+        self.d4 = Dock("D4 - Yaw", closable=True)
+        self.d5 = Dock("D5 - values", closable=True)
+        self.d6 = Dock("D6 - control", closable=True)
 
-        self.area.addDock(self.d5, 'left')
-        self.area.addDock(self.d6, 'bottom', self.d5)
-        self.area.addDock(self.d1, 'right',closable=True)     
-        self.area.addDock(self.d2, 'bottom', self.d1  ) 
-        
+        self.area.addDock(self.d5, "left")
+        self.area.addDock(self.d6, "bottom", self.d5)
+        self.area.addDock(self.d1, "right", closable=True)
+        self.area.addDock(self.d2, "bottom", self.d1)
 
         # add buttons for time control:
         self.button_reset = QPushButton()
@@ -237,51 +256,55 @@ class Visualizer3D(object):
         self.button_play.setText(">")
         self.button_play.clicked.connect(self.on_click_play)
 
-        self.saveBtn = QtGui.QPushButton('Save dock state')
-        self.restoreBtn = QtGui.QPushButton('Restore dock state')
+        self.saveBtn = QPushButton("Save dock state")
+        self.restoreBtn = QPushButton("Restore dock state")
 
         def save():
             global state
             state = self.area.saveState()
             print(state)
+
         def load():
             global state
             self.area.restoreState(state)
+
         self.saveBtn.clicked.connect(save)
         self.restoreBtn.clicked.connect(load)
 
         # Live Data text area
-        self.data_info_text = QLabel('Live Data info')
+        self.data_info_text = QLabel("Live Data info")
         self.data_info_text.setContentsMargins(15, 15, 15, 15)
-        self.d5.addWidget(self.data_info_text)  
+        self.d5.addWidget(self.data_info_text)
 
-        self.d6.addWidget(self.button_stop)  
-        self.d6.addWidget(self.button_play)  
-        self.d6.addWidget(self.button_backward)  
-        self.d6.addWidget(self.button_forward)  
-        self.d6.addWidget(self.button_reset)  
-        self.d6.addWidget(self.saveBtn)  
-        self.d6.addWidget(self.restoreBtn)  
-       # self.layout_top.addLayout(self.top_left, 15)  
+        self.d6.addWidget(self.button_stop)
+        self.d6.addWidget(self.button_play)
+        self.d6.addWidget(self.button_backward)
+        self.d6.addWidget(self.button_forward)
+        self.d6.addWidget(self.button_reset)
+        self.d6.addWidget(self.saveBtn)
+        self.d6.addWidget(self.restoreBtn)
+        # self.layout_top.addLayout(self.top_left, 15)
 
-        #Anim 3D
+        # Anim 3D
         # self.D3_holder = QWidget(parent=self.mainWidget )
         self.w = gl.GLViewWidget(parent=parent)
         self.d1.addWidget(self.w, 85)  # 80% of the width
 
         # Plot
-        self.plots = pg.GraphicsWindow(title="Basic plotting ")
+        self.plots = pg.GraphicsLayoutWidget()
+        # self.plots = pg.GraphicsWindow(title="Basic plotting ")
+        p = self.plots.addPlot(title="Basic plotting")
         pg.setConfigOptions(antialias=True)
         self.d2.addWidget(self.plots, 20)  # 80% of the width
 
-        #self.mainWidget.setLayout(self.layout)
+        # self.mainWidget.setLayout(self.layout)
 
         self.timer = QtCore.QTimer(self.area)
 
-        #self.w = gl.GLViewWidget()
+        # self.w = gl.GLViewWidget()
         self.w.opts["distance"] = 160
         self.w.setWindowTitle("3D view track")
-        #self.w.setGeometry(0, 110, 720, 480)
+        # self.w.setGeometry(0, 110, 720, 480)
 
         self.df = None
         self.track = None
@@ -317,24 +340,24 @@ class Visualizer3D(object):
         self.w.addItem(self.geom)
 
     # Timer functions:
-    #  
+    #
     def on_click_reset(self):
         logger.debug("reset self.index")
         self.index = 0
 
-    def on_click_backward(self ):
-        logger.debug("backward - :" +str(50))
+    def on_click_backward(self):
+        logger.debug("backward - :" + str(50))
         self.index -= 50
 
-    def on_click_forward(self ):
-        logger.debug("forward + :" +str(50))
+    def on_click_forward(self):
+        logger.debug("forward + :" + str(50))
         self.index += 50
-    
-    def on_click_stop(self ):
+
+    def on_click_stop(self):
         logger.debug("stop ")
         self.play = False
 
-    def on_click_play(self ):
+    def on_click_play(self):
         logger.debug("play ")
         self.play = True
 
@@ -349,7 +372,7 @@ class Visualizer3D(object):
         nb_record = len(self.df)
         average_step_time = duration / nb_record
 
-        logger.info('duration: ' + str(duration) + " for nb record: " + str(nb_record))
+        logger.info("duration: " + str(duration) + " for nb record: " + str(nb_record))
         logger.info("average_step_time" + str(average_step_time))
 
         self.step_interval = average_step_time
@@ -358,13 +381,11 @@ class Visualizer3D(object):
 
         if (sys.flags.interactive != 1) or not hasattr(QtCore, "PYQT_VERSION"):
             # sys.exit(QtGui.QApplication.instance().exec_())
-            QtGui.QApplication.instance().exec_()
+            QApplication.instance().exec_()
             logger.info("Exit")
 
-
     def update(self):
-        """Function called on each animation iteration
-        """
+        """Function called on each animation iteration"""
 
         if self.play:
 
@@ -387,20 +408,27 @@ class Visualizer3D(object):
             lon = self.df["lon_m"].iloc[i]
             alt = self.df["alt_m"].iloc[i]
 
-            #Update Text data
-            self.data_info_text.setText(f'i: \t {i} \n' + f'time simu: \t {time_simu:.2f} \n' +
-                                        f'time0_s: \t {time0_s:.2f} \n' + f'time diff: \t {diff_time:.2f} \n\n' +
-                                        f'pitch: \t {pitch:.1f} \n' + f'roll: \t {roll:.1f} \n' +
-                                        f'yaw: \t {yaw:.1f} \n\n' + f'x: \t {lat:.1f} \n' + f'y: \t {lon:.1f} \n' +
-                                        f'z: \t {alt:.1f} \n\n')
+            # Update Text data
+            self.data_info_text.setText(
+                f"i: \t {i} \n"
+                + f"time simu: \t {time_simu:.2f} \n"
+                + f"time0_s: \t {time0_s:.2f} \n"
+                + f"time diff: \t {diff_time:.2f} \n\n"
+                + f"pitch: \t {pitch:.1f} \n"
+                + f"roll: \t {roll:.1f} \n"
+                + f"yaw: \t {yaw:.1f} \n\n"
+                + f"x: \t {lat:.1f} \n"
+                + f"y: \t {lon:.1f} \n"
+                + f"z: \t {alt:.1f} \n\n"
+            )
 
-            #Update arrow:
-            self.custom['arrow_alt'].setPos(time0_s, alt)
-            self.custom['arrow_pitch'].setPos(time0_s, pitch)
-            self.custom['arrow_nb_g'].setPos(time0_s, nb_g)
-            self.custom['arrow_yaw'].setPos(time0_s, yaw)
+            # Update arrow:
+            self.custom["arrow_alt"].setPos(time0_s, alt)
+            self.custom["arrow_pitch"].setPos(time0_s, pitch)
+            self.custom["arrow_nb_g"].setPos(time0_s, nb_g)
+            self.custom["arrow_yaw"].setPos(time0_s, yaw)
 
-            #Update 3D body
+            # Update 3D body
             self.geom.resetTransform()
             # Important  to rotate before translated
             self.geom.rotate(pitch, 0, 1, 0)
@@ -418,11 +446,8 @@ class Visualizer3D(object):
                 self.w.addItem(plt)
                 self.track_is_ploted = True
 
-
-
     def animation(self, mdata, plot_track, timer=None):
-        """ Prepare the animation
-        """
+        """Prepare the animation"""
 
         print("total records:" + str(len(mdata)))
 
@@ -431,7 +456,7 @@ class Visualizer3D(object):
         if plot_track:
             self.extract_path_track()
 
-        #Plot
+        # Plot
         self.custom = add_plot(mdata, self.plots)
 
         if not timer:
@@ -442,33 +467,34 @@ class Visualizer3D(object):
 
         logger.info("step time ms: " + str(self.step_interval))
 
-        self.timer.start(self.step_interval * 1000)  # because timer.start is in ms not in s
+        self.timer.start(
+            int(self.step_interval * 1000)
+        )  # because timer.start is in ms not in s
 
         self.start()
 
 
-# Start Qt event loop unless running in interactive mode. 
+# Start Qt event loop unless running in interactive mode.
 if __name__ == "__main__":
-    """Function use to run a 3D as standalone file ( for debuging)
-    """
-    # Load dummy file 
+    """Function use to run a 3D as standalone file ( for debuging)"""
+    # Load dummy file
 
     import sys
 
     os.environ["DISPLAY"] = ":0"
     cwd = os.path.dirname(os.path.abspath(__file__))
-    logger.info('cwd:' + cwd)
+    logger.info("cwd:" + cwd)
     cwd_parent, _ = os.path.split(cwd)
     sys.path.insert(0, cwd_parent)
 
-    from PyQt5.QtWidgets import (QApplication, QMainWindow)
+    from PyQt5.QtWidgets import QApplication, QMainWindow
     from geometry_modeling import Create_geom
 
     file_name = "mflight_plot_V1.pkl"
 
     file_path = os.path.join(cwd_parent, file_name)
-    logger.info('file_path:' + file_path)
-    with open(file_path, 'rb') as pickle_file:
+    logger.info("file_path:" + file_path)
+    with open(file_path, "rb") as pickle_file:
         flight = pickle.load(pickle_file)
     main_uid_section = flight.sections[0].id
     df_to_plot = flight.apply_section(main_uid_section)

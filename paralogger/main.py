@@ -1,6 +1,6 @@
-#coding:utf-8
+# coding:utf-8
 """
-PARALOGER ANALYSIS 
+PARALOGER ANALYSIS
 
 Main file , start Point.
 
@@ -8,8 +8,10 @@ Main file , start Point.
 """
 __credits__ = ["Mattleg", "Bruno D", "Fred P"]
 __license__ = "GPL V3"
-__version__ = '0.3.0'
-__pickle_file_version__ = 2  #This will help to detect previous version of pkl file when imported
+__version__ = "0.3.0"
+__pickle_file_version__ = (
+    2  # This will help to detect previous version of pkl file when imported
+)
 
 import logging
 import os
@@ -22,7 +24,9 @@ from enum import Enum
 
 from logging.handlers import RotatingFileHandler
 
-from pyqtgraph.Qt import QtCore, QtGui, QtWidgets 
+from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
+
+
 import pyqtgraph.console
 import pyqtgraph as pg
 
@@ -37,7 +41,7 @@ from list_param import Position, Device, Kind
 from model import Flight, Sections, getSystemInfo, timeit
 from judge import Judge
 
-os.environ["DISPLAY"] = ":0"  #Use for linux  on vscode at least
+os.environ["DISPLAY"] = ":0"  # Use for linux  on vscode at least
 
 
 log_file_name = "main_paralogger.log"
@@ -50,7 +54,9 @@ def config_logger():
     logger = logging.getLogger()
     # logging.basicConfig(filename='1_import.log',level=logging.DEBUG)
     logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s :: %(levelname)s :: %(module)s :: %(funcName)s ::  %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s :: %(levelname)s :: %(module)s :: %(funcName)s ::  %(message)s"
+    )
     file_handler = logging.handlers.RotatingFileHandler(log_file_name, "a", 1000000, 1)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
@@ -65,27 +71,29 @@ def config_logger():
 
 logger = config_logger()
 
+
 def deleteItemsOfLayout(layout):
-     if layout is not None:
-         while layout.count():
-             item = layout.takeAt(0)
-             widget = item.widget()
-             if widget is not None:
-                 widget.setParent(None)
-             else:
-                 deleteItemsOfLayout(item.layout())
+    if layout is not None:
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)
+            else:
+                deleteItemsOfLayout(item.layout())
 
 
-class Prog(QtGui.QMainWindow):
+class Prog(QtWidgets.QMainWindow):
     """This is the MAIN program, this is the start point,
      nothing should be calle from doutside of this class.
-    
+
     Arguments:
         QtGui.QMainWindow {QMainWindow object } -- QMainWindow legacy
-    
+
     Returns:
         [None] -- Just run until it closed
     """
+
     def __init__(self):
         super().__init__(None)
 
@@ -93,11 +101,14 @@ class Prog(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.timer = QtCore.QTimer(self)
 
-        #set up the log tab
+        # set up the log tab
         logTextBox = QTextEditLogger(self)
 
         logTextBox.setFormatter(
-            logging.Formatter('"%(asctime)s - %(levelname)s \t- %(module)s \t- %(funcName)s ::  %(message)s"'))
+            logging.Formatter(
+                '"%(asctime)s - %(levelname)s \t- %(module)s \t- %(funcName)s ::  %(message)s"'
+            )
+        )
         logging.getLogger().addHandler(logTextBox)
         layout_log = QtWidgets.QVBoxLayout()
         layout_log.addWidget(logTextBox.widget)
@@ -106,15 +117,14 @@ class Prog(QtGui.QMainWindow):
         logger.info("Python : " + str(sys.version))
         logger.info("Prog  version : " + str(__version__))
         logger.info("-------")
-        
 
-        #Set up variable
+        # Set up variable
         self.flight = None
-        self.visualizer_3d = None      
-        self.judge = None 
+        self.visualizer_3d = None
+        self.judge = None
         self.load_judge_file()
 
-        #add Action
+        # add Action
         self.ui.actionOpen.triggered.connect(self.open_pickle_file)
         self.ui.actionSave_as.triggered.connect(self.save_pickle_file)
         self.ui.actionimport.triggered.connect(self.import_log_window)
@@ -126,55 +136,57 @@ class Prog(QtGui.QMainWindow):
         self.ui.treeWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.ui.treeWidget.customContextMenuRequested.connect(self.openMenu)
 
-        #setup Qtree
+        # setup Qtree
         self.ui.treeWidget.setHeaderLabels(["Name", "Kind", "Id"])
 
-        #setup table view detail section
-        self.ui.model = QtGui.QStandardItemModel(self)  
+        # setup table view detail section
+        self.ui.model = QtGui.QStandardItemModel(self)
         self.ui.tableView.setModel(self.ui.model)
         self.ui.model.dataChanged.connect(self.on_datachange_model)
 
-        #setup iteractive console
+        # setup iteractive console
         ## build an initial namespace for console commands to be executed in (this is optional;
         ## the user can always import these modules manually)
-        namespace = {'prog':self ,"Kind":Kind }
+        namespace = {"prog": self, "Kind": Kind}
         ## initial text to display in the console
-        text = " This is an interactive python console \n the following namespace are imported:\n" +  str(list(namespace.keys())) + " \n  Go, play."
-        
+        text = (
+            " This is an interactive python console \n the following namespace are imported:\n"
+            + str(list(namespace.keys()))
+            + " \n  Go, play."
+        )
+
         self.c = pyqtgraph.console.ConsoleWidget(namespace=namespace, text=text)
         mainLayout_console = QtWidgets.QVBoxLayout()
         mainLayout_console.addWidget(self.c)
         self.ui.tab_console.setLayout(mainLayout_console)
         logger.info(" interactive console ready")
 
-
-
-
-
-
     def debug(self):
-        ''' only use for speed up de developement
-        '''
-        self.open_pickle_file("samples/Flight2_gourdon_v0-2-0.pkl")   #linux path
+        """only use for speed up de developement"""
+        self.open_pickle_file(
+            "/home/fred/Fish/fish_finger_trial/fish_finger_pixracer/data/run_bike.pkl"
+        )  # linux path
 
-    def load_judge_file(self,judge_path = "judge1.json" ):
+    def load_judge_file(self, judge_path="judge1.json"):
         try:
-            self.judge = Judge(judge_path) 
+            self.judge = Judge(judge_path)
         except Exception as ex:
-                logger.error(ex)
+            logger.error(ex)
 
-    def open_pickle_file(self, filename=None): 
+    def open_pickle_file(self, filename=None):
         """Function to import a file already saved, format is classic python pickle .pkl
-        
+
         Keyword Arguments:
             filename {[str]} -- if a path is given the browse dialog do not open ( use for debug function) (default: {None})
-        
+
         Returns:
             [None] -- But saved the nex loaded flight in the main self.Flight object.
-        """            
+        """
 
         if filename == False:
-            filename = QtGui.QFileDialog.getOpenFileName(self, 'Open pickler File', "", 'Pickle Files (*.pkl)')
+            filename = QtWidgets.QFileDialog.getOpenFileName(
+                self, "Open pickler File", "", "Pickle Files (*.pkl)"
+            )
 
         if isinstance(filename, tuple):
             filename = filename[0]
@@ -183,15 +195,22 @@ class Prog(QtGui.QMainWindow):
                 logger.info(" importing : " + str(filename))
                 self.file_name = filename
                 self.id = 0
-                with open(filename, 'rb') as pickle_file:
+                with open(filename, "rb") as pickle_file:
                     self.flight = pickle.load(pickle_file)
 
-                #Check for version of the opened file 
-                if hasattr(self.flight, 'flight_version'):
-                    if int(self.flight.flight_version) < __pickle_file_version__ :
-                        logger.info(" !! Importing Old file format: " + str(self.flight.flight_version) + " current is: " + str(__pickle_file_version__))
+                # Check for version of the opened file
+                if hasattr(self.flight, "flight_version"):
+                    if int(self.flight.flight_version) < __pickle_file_version__:
+                        logger.info(
+                            " !! Importing Old file format: "
+                            + str(self.flight.flight_version)
+                            + " current is: "
+                            + str(__pickle_file_version__)
+                        )
                 else:
-                    logger.info(" !! Importing a file without flight_version info: version can not be checked ")
+                    logger.info(
+                        " !! Importing a file without flight_version info: version can not be checked "
+                    )
 
                 self.update_project_tree()
 
@@ -199,18 +218,19 @@ class Prog(QtGui.QMainWindow):
                 logger.error(ex)
 
     def save_pickle_file(self):
-        """Save the current self.Flight object to a pickle file. (.pkl)
-        """
+        """Save the current self.Flight object to a pickle file. (.pkl)"""
         try:
-            tuple_saved_file = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '', 'Pickle(*.pkl)')
-            name_saved_file = tuple_saved_file[0] + '.pkl'
-            logger.info("Saving as : " + name_saved_file[0] + '.pkl')
+            tuple_saved_file = QtWidgets.QFileDialog.getSaveFileName(
+                self, "Save File", "", "Pickle(*.pkl)"
+            )
+            name_saved_file = tuple_saved_file[0] + ".pkl"
+            logger.info("Saving as : " + name_saved_file[0] + ".pkl")
             with open(name_saved_file, "wb") as f:
                 pickle.dump(self.flight, f)
 
         except Exception as ex:
             logger.error(ex)
-    
+
     def import_log_window(self):
         """Function will display a other dialog to fill for loading a raw  log file
         the dialog will auto close when the import is finish.
@@ -225,44 +245,44 @@ class Prog(QtGui.QMainWindow):
             logger.warning(ex)
 
     def about_popup(self):
-        """ About section 
+        """About section
         Display various info for debug and system details
         TODO ; having a better list of the enviroment module and their version.
         """
 
         # from https://stackoverflow.com/questions/54447535/how-to-fix-typeerror-in-qtwidgets-qmessagebox-for-popup-messag
         cwd = os.path.dirname(os.path.abspath(__file__))
-        
+
         log_content = getSystemInfo()
 
         msg = QtWidgets.QMessageBox()
         msg.setIcon(QtWidgets.QMessageBox.Information)
-        msg.setText("Version : " + str(__version__) + "\n"
-                    "pkl file version: " + str(log_file_name) + "\n"
-                    "Log file name: " + str(__pickle_file_version__) + "\n"
-                    "curent working directory: " + str(cwd))
+        msg.setText(
+            "Version : " + str(__version__) + "\n"
+            "pkl file version: " + str(log_file_name) + "\n"
+            "Log file name: " + str(__pickle_file_version__) + "\n"
+            "curent working directory: " + str(cwd)
+        )
         msg.setInformativeText("More info on :\nhttps://github.com/fredvol/paralogger ")
         msg.setWindowTitle("About")
         msg.setDetailedText(log_content)
-        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)  #| QtWidgets.QMessageBox.Cancel)
+        msg.setStandardButtons(
+            QtWidgets.QMessageBox.Ok
+        )  # | QtWidgets.QMessageBox.Cancel)
 
         retval = msg.exec_()
 
     def openUrl_help(self):
-        """Open github page in browser
-        """
-        url = QtCore.QUrl('https://github.com/fredvol/paralogger')
+        """Open github page in browser"""
+        url = QtCore.QUrl("https://github.com/fredvol/paralogger")
         if not QtGui.QDesktopServices.openUrl(url):
-            QtGui.QMessageBox.warning(self, 'Open Url', 'Could not open url')
-
-
+            QtGui.QMessageBox.warning(self, "Open Url", "Could not open url")
 
     ### TREE VIEW  ###
-    # Tree view will display the flight and all the sections attach to. 
-    
+    # Tree view will display the flight and all the sections attach to.
+
     def update_project_tree(self):
-        """repopulated the tree view , to show modif.
-        """
+        """repopulated the tree view , to show modif."""
         logger.info("update_project_tree")
         tw = self.ui.treeWidget
         tw.clear()
@@ -270,7 +290,13 @@ class Prog(QtGui.QMainWindow):
             l1 = QtWidgets.QTreeWidgetItem([self.flight.glider, "--", self.flight.id])
 
             for sect in self.flight.sections:
-                l1_child = QtWidgets.QTreeWidgetItem([str(sect.start) + " - " + str(sect.end), str(sect.kind.value), sect.id])
+                l1_child = QtWidgets.QTreeWidgetItem(
+                    [
+                        str(sect.start) + " - " + str(sect.end),
+                        str(sect.kind.value),
+                        sect.id,
+                    ]
+                )
                 l1.addChild(l1_child)
 
             tw.addTopLevelItem(l1)
@@ -282,10 +308,10 @@ class Prog(QtGui.QMainWindow):
         """Return the level in the treeview
         level 0 = Flight
         level 1 = Section
-        
+
         Arguments:
             indexes {[QModelIndex]} -- not realy clear for me !
-        
+
         Returns:
             level [Int]  -- The level of the cliked item
         """
@@ -305,7 +331,7 @@ class Prog(QtGui.QMainWindow):
     def onTreeItemClicked(self, it, col):
         """function trigered when an object is cliked on the tree view
         This a central function which dispath the work to the other objects .
-        
+
         Arguments:
             it {QTreeWidgetItem} -- item cliked
             col {int} -- index of  columns cliked
@@ -315,20 +341,28 @@ class Prog(QtGui.QMainWindow):
 
         level = self.get_level_from_index(indexes)
 
-        if level >= 0: # if a Flight or a Section
+        if level >= 0:  # if a Flight or a Section
             uid = it.text(2)  # The text of the node.
-            logger.debug("clicked: " + str(it) + ", " + str(col) + ", " + str(uid) + " level: " + str(level))
+            logger.debug(
+                "clicked: "
+                + str(it)
+                + ", "
+                + str(col)
+                + ", "
+                + str(uid)
+                + " level: "
+                + str(level)
+            )
         else:
             uid = None
 
-
-        #Job dispatching
+        # Job dispatching
         if level == 0:  # flight  level
             self.populate(uid, level)
             self.display_tab_Table(None)
 
         elif level == 1:  # section level
-            #update all tabs
+            # update all tabs
             self.display_tab_graph(uid)
             self.display_tab_Table(uid)
             self.display_tab_3D(uid)
@@ -338,7 +372,7 @@ class Prog(QtGui.QMainWindow):
 
     def openMenu(self, position):
         """Open contextual menu in tree View widget
-        
+
         Arguments:
             position {[type]} -- [description]
         """
@@ -357,23 +391,29 @@ class Prog(QtGui.QMainWindow):
             action_refresh = menu.addAction(self.tr("Refresh"))
             action_refresh.triggered.connect(self.update_project_tree)
 
-            action_export_csv = menu.addAction('Export CSV')
+            action_export_csv = menu.addAction("Export CSV")
             action_export_csv.triggered.connect(lambda: self.export_df(expformat="csv"))
 
-            action_export_xls = menu.addAction('Export XLSX')
-            action_export_xls.triggered.connect(lambda: self.export_df(expformat="xlsx"))
+            action_export_xls = menu.addAction("Export XLSX")
+            action_export_xls.triggered.connect(
+                lambda: self.export_df(expformat="xlsx")
+            )
 
-            action_export_xls = menu.addAction('Export device parameters')
+            action_export_xls = menu.addAction("Export device parameters")
             action_export_xls.triggered.connect(self.export_device_param)
 
-        elif level == 1: #Section
-            action_export_csv = menu.addAction('Export CSV')
-            action_export_csv.triggered.connect(lambda: self.export_df(uid,expformat="csv"))
+        elif level == 1:  # Section
+            action_export_csv = menu.addAction("Export CSV")
+            action_export_csv.triggered.connect(
+                lambda: self.export_df(uid, expformat="csv")
+            )
 
-            action_export_xls = menu.addAction('Export XLSX')
-            action_export_xls.triggered.connect(lambda: self.export_df(uid,expformat="xlsx"))
+            action_export_xls = menu.addAction("Export XLSX")
+            action_export_xls.triggered.connect(
+                lambda: self.export_df(uid, expformat="xlsx")
+            )
 
-            action_del = menu.addAction('Delete')
+            action_del = menu.addAction("Delete")
             action_del.triggered.connect(lambda: self.delete_section(uid))
 
             action_refresh = menu.addAction(self.tr("Refresh"))
@@ -383,7 +423,7 @@ class Prog(QtGui.QMainWindow):
 
     def delete_section(self, uid):
         """Delete the a Section from the self.Flight and refresh
-        
+
         Arguments:
             uid {Str} -- Uid of the Section to delete
         """
@@ -398,56 +438,58 @@ class Prog(QtGui.QMainWindow):
         logger.info("add section")
         self.flight.add_general_section()
         self.update_project_tree()
-    
+
     def export_device_param(self):
-        """ Export the internal parameters of the PX4 
+        """Export the internal parameters of the PX4
         TODO  not avaible if not PX4 filter
         """
 
         df_param = self.flight.data[0].device_param
-        tuple_export_file = QtGui.QFileDialog.getSaveFileName(self, 'csv_file', '', '.csv')
-        name_export_file = tuple_export_file[0] + '.csv'
-        with open(name_export_file, 'w', newline="") as csv_file:  
+        tuple_export_file = QtWidgets.QFileDialog.getSaveFileName(
+            self, "csv_file", "", ".csv"
+        )
+        name_export_file = tuple_export_file[0] + ".csv"
+        with open(name_export_file, "w", newline="") as csv_file:
             writer = csv.writer(csv_file)
             for key, value in df_param.items():
                 writer.writerow([key, value])
 
         logger.info("Device parameters exported : " + str(name_export_file))
 
-
-    def export_df(self,uid = None, expformat="csv"):
+    def export_df(self, uid=None, expformat="csv"):
         """Export Dataframe  in different format
-        
+
         Keyword Arguments:
             uid {str} -- Uid of the Section to export (default: {None})
             expformat {str} -- Format to export [csv , xlsx] (default: {"csv"})
-        
+
         If UID is None then export the flight ( maybe change to use the level info, to be consitent)
         """
         # TODO add multi sheet( xlsx) or file (csv) if multi data_file in flight
         if uid != None:  # if it is a section
             df_to_export = self.flight.apply_section(uid)
         else:  # if not section passed , then export main df
-            df_to_export = self.flight.get_df_by_position(Position.PILOT)[0] 
+            df_to_export = self.flight.get_df_by_position(Position.PILOT)[0]
         try:
-            tuple_export_file = QtGui.QFileDialog.getSaveFileName(self, 'Export Dataframe File', '', '.'+str(expformat))
-            name_export_file = tuple_export_file[0] + '.' + str(expformat)
-            if expformat == 'csv':
+            tuple_export_file = QtWidgets.QFileDialog.getSaveFileName(
+                self, "Export Dataframe File", "", "." + str(expformat)
+            )
+            name_export_file = tuple_export_file[0] + "." + str(expformat)
+            if expformat == "csv":
                 df_to_export.to_csv(name_export_file)
-            elif expformat == 'xlsx':
+            elif expformat == "xlsx":
                 logger.info("Exporting to Excel can take a while, coffee time ...")
-                df_to_export.to_excel(name_export_file) 
+                df_to_export.to_excel(name_export_file)
             logger.info("Exported as : " + name_export_file)
         except Exception as ex:
             logger.error(ex)
-
 
     #### TAB WIDGET ACTIONS ###
     # This section manage all the Tab ins the view part of the main windows.
 
     def display_tab_3D(self, uid):
         """Call the Tab_3d.py  and generated a 3D view .
-        
+
         Arguments:
             uid {str} -- id of the Section to display
         Nothing append if Flight is selected, only for Sections
@@ -460,14 +502,14 @@ class Prog(QtGui.QMainWindow):
 
         self.visualizer_3d = Visualizer3D(self.ui.tab_3d)
         self.visualizer_3d.animation(df_to_plot, True, timer=self.timer)
-        #empty actual area if exist
+        # empty actual area if exist
         if len(self.ui.tab_3d.children()) > 0:
             layout = self.ui.tab_3d.children()[0]
             deleteItemsOfLayout(layout)
 
             layout.addWidget(self.visualizer_3d.area)
 
-        else :
+        else:
             mainLayout = QtWidgets.QVBoxLayout()
             mainLayout.addWidget(self.visualizer_3d.area)
             self.ui.tab_3d.setLayout(mainLayout)
@@ -482,37 +524,43 @@ class Prog(QtGui.QMainWindow):
         logger.debug(section)
         logger.debug(df_to_analysis.info())
 
-
-        if self.judge != None :
-            hash_judge , hash_dict_crit = self.judge.hash_state()
+        if self.judge != None:
+            hash_judge, hash_dict_crit = self.judge.hash_state()
             self.ui.label_judge_file.setText(str(self.judge))
             self.ui.label_hash_judge_value.setText(hash_judge)
             self.ui.label_hash_crit_value.setText(hash_dict_crit)
 
             table_analysis = self.ui.tableWidget_analysis
 
-            result_section = self.judge.run(df_to_analysis,section.kind.value)
+            result_section = self.judge.run(df_to_analysis, section.kind.value)
 
-            column_name = ["Test" ,"Value","unit","Grade"]
-            column_count = (len(column_name))
+            column_name = ["Test", "Value", "unit", "Grade"]
+            column_count = len(column_name)
 
-            table_analysis.setColumnCount(column_count) 
+            table_analysis.setColumnCount(column_count)
 
             table_analysis.setHorizontalHeaderLabels(column_name)
 
             for key, value in result_section.items():
-                currentRowCount = table_analysis.rowCount() 
+                currentRowCount = table_analysis.rowCount()
 
                 table_analysis.insertRow(currentRowCount)
-                table_analysis.setItem(currentRowCount, 0, QtGui.QTableWidgetItem(str(key)))
-                table_analysis.setItem(currentRowCount, 1, QtGui.QTableWidgetItem(str(value["value"])))
-                table_analysis.setItem(currentRowCount, 2, QtGui.QTableWidgetItem(str(value["unit"])))
-                table_analysis.setItem(currentRowCount, 3, QtGui.QTableWidgetItem(str(value["grade"])))
-        
+                table_analysis.setItem(
+                    currentRowCount, 0, QtGui.QTableWidgetItem(str(key))
+                )
+                table_analysis.setItem(
+                    currentRowCount, 1, QtGui.QTableWidgetItem(str(value["value"]))
+                )
+                table_analysis.setItem(
+                    currentRowCount, 2, QtGui.QTableWidgetItem(str(value["unit"]))
+                )
+                table_analysis.setItem(
+                    currentRowCount, 3, QtGui.QTableWidgetItem(str(value["grade"]))
+                )
 
     def display_tab_Table(self, uid):
-        """ Display the Pilot dataframe  in a table
-        
+        """Display the Pilot dataframe  in a table
+
         Arguments:
             uid {str} -- id of the Section to display
 
@@ -524,7 +572,7 @@ class Prog(QtGui.QMainWindow):
             if uid != None:  # if it is a section
                 df_to_plot = self.flight.apply_section(uid)
             else:  # if not section passed , then plot main df
-                df_to_plot = self.flight.get_df_by_position(Position.PILOT)[0] 
+                df_to_plot = self.flight.get_df_by_position(Position.PILOT)[0]
 
             model = pandasTableModel(df_to_plot)
             if len(self.ui.tab_table.children()) > 0:
@@ -543,11 +591,11 @@ class Prog(QtGui.QMainWindow):
             pass
 
     def display_tab_graph(self, uid):
-        """PLot different Graph 
+        """PLot different Graph
 
         Arguments:
             uid {str} -- id of the Section to display
-        
+
         Work only for Section
         TODO: Display full Flight with the section part Highlighted.
         """
@@ -555,7 +603,7 @@ class Prog(QtGui.QMainWindow):
         df_to_plot = self.flight.apply_section(uid)
         inside_widget = generated_layout(df_to_plot)
 
-        #empty actual area if exist
+        # empty actual area if exist
         if len(self.ui.tab_graph.children()) > 0:
             print("layout not empty")
             layout = self.ui.tab_graph.children()[0]
@@ -579,7 +627,7 @@ class Prog(QtGui.QMainWindow):
 
     def on_datachange_model(self, signal):
         """Function use to update the self.Flight object  when a value is changed in the Detail table view
-        
+
         Arguments:
             signal {QModelIndex} -- Index of the modified cell
 
@@ -595,8 +643,11 @@ class Prog(QtGui.QMainWindow):
         index = signal.sibling(row, 0)
         index_dict = self.ui.model.itemData(index)
         index_value = index_dict.get(0)
-        logger.debug('Edited Row {}, Col {} value: {} index_value: {}, uid: {}'.format(
-            row, column, cell_value, index_value, uid))
+        logger.debug(
+            "Edited Row {}, Col {} value: {} index_value: {}, uid: {}".format(
+                row, column, cell_value, index_value, uid
+            )
+        )
 
         ## Update the Data model ( self.flight) from the changed done in self.ui_model
         if self.flight.id == uid:
@@ -610,24 +661,22 @@ class Prog(QtGui.QMainWindow):
         self.update_project_tree()
 
     def populate(self, uid, level):
-
-        """ Add data in the Table view , via model 
+        """Add data in the Table view , via model
         Exxtract a Dict of of a object properties.
         ! model only accepts strings - must convert.
- 
+
         Arguments:
             uid {str} -- ID of the object to display
             level {int} -- object cliked level ( FLight or Section)
         """
 
         logger.debug("display_properties of: " + str(uid))
-        self.ui.model.clear() # Clear th UI model notthe self.Flight
+        self.ui.model.clear()  # Clear th UI model notthe self.Flight
 
         if level == 0:
             dict_to_display = vars(self.flight)
         elif level == 1:
             dict_to_display = vars(self.flight.section_by_id(uid))
-
 
         for name, value in dict_to_display.items():
             row = []
@@ -636,7 +685,7 @@ class Prog(QtGui.QMainWindow):
             if isinstance(value, Kind):
                 cell_value = QtGui.QStandardItem(str(value))
                 # TODO  display combobox with a list of option (QItemDelegate? )
-                
+
             else:
                 cell_value = QtGui.QStandardItem(str(value))
 
@@ -645,25 +694,23 @@ class Prog(QtGui.QMainWindow):
 
             self.ui.model.appendRow(row)
 
-
         # self.show()
 
 
 def main():
     logger.info(" --- Start ----")
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     MyProg = Prog()
     MyProg.show()
     sys.exit(app.exec_())
 
 
-if __name__ == '__main__':
-    """Absolute Start Point of the universe!
-    """
+if __name__ == "__main__":
+    """Absolute Start Point of the universe!"""
     main()
 
 # MISC
 # pyuic5 paraloger_GUI1.ui > main_gui.py
-# pyuic5 import_log_GUI.ui > import_log_gui.py 
+# pyuic5 import_log_GUI.ui > import_log_gui.py
 # panda to table view:  https://stackoverflow.com/questions/44603119/how-to-display-a-pandas-data-frame-with-pyqt5-pyside2
 #
