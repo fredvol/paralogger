@@ -6,7 +6,7 @@ Misc stuff about paraglider logger
 * Testing and judging the reliabilyty of the dataloggers , and assess theirs adavantges and their limits.
 * Collect datas in view to propose criteria for the norm.
 
-## Actual state (Dec 2019):
+## Actual state :
 * the validation indoors looks good.
 * A first gui software is on devellopement:
 * Still work to do on the device ( batterie, keyboard, case)
